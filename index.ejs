@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Football World</title>
+  <link rel="stylesheet" href="/stylesheets/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body, html { font-family: 'DM Sans', sans-serif; background: #0a0e17; color: white; }
+
+    header {
+      background: transparent;
+      backdrop-filter: none;
+      padding: 0 40px; display: flex; justify-content: space-between; align-items: center;
+      position: fixed; top:0; left:0; right:0; z-index: 200; height: 78px;
+      border-bottom: 1px solid transparent;
+      transition: background 0.4s ease, border-color 0.4s ease;
+    }
+    header.scrolled {
+      background: rgba(8,12,20,0.97);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255,215,0,0.1);
+    }
+    .logo { height: 62px; width: auto; }
+    nav ul { display:flex; gap:4px; list-style:none; padding:0; margin:0; align-items:center; flex-wrap:wrap; }
+    nav a { color:rgba(255,255,255,0.9); text-decoration:none; font-weight:600; font-size:15px; padding:8px 14px; border-radius:8px; transition:all 0.2s; white-space:nowrap; text-shadow: 0 1px 4px rgba(0,0,0,0.6); }
+    nav a:hover, nav a.active { color:#FFD700; background:rgba(255,215,0,0.08); text-shadow:none; }
+    nav a.login-btn { background:#f70404; color:white; border-radius:20px; padding:7px 18px; margin-left:6px; }
+    nav a.login-btn:hover { background:#ff3333; color:white; }
+
+    /* MORE DROPDOWN */
+    .nav-more { position:relative; }
+    .nav-more-btn {
+      color:rgba(255,255,255,0.9); background:none; border:none; font-weight:600; font-size:15px;
+      padding:8px 14px; border-radius:8px; cursor:pointer; font-family:'DM Sans',sans-serif;
+      transition:all 0.2s; display:flex; align-items:center; gap:4px; white-space:nowrap;
+      text-shadow: 0 1px 4px rgba(0,0,0,0.6);
+    }
+    .nav-more-btn:hover { color:#FFD700; background:rgba(255,215,0,0.08); }
+    .nav-more-btn .arrow { font-size:10px; transition:transform 0.2s; }
+    .nav-more.open .nav-more-btn .arrow { transform:rotate(180deg); }
+    .more-dropdown {
+      display:none; position:absolute; top:calc(100% + 8px); right:0;
+      background:#0f1623; border:1px solid rgba(255,215,0,0.2); border-radius:14px;
+      overflow:hidden; z-index:999; box-shadow:0 20px 60px rgba(0,0,0,0.7);
+      min-width:200px;
+    }
+    .nav-more.open .more-dropdown { display:block; }
+    .more-dropdown a {
+      display:flex; align-items:center; gap:10px; padding:11px 16px;
+      color:rgba(255,255,255,0.8); text-decoration:none; font-size:13px; font-weight:600;
+      transition:all 0.15s; border-bottom:1px solid rgba(255,255,255,0.04);
+    }
+    .more-dropdown a:last-child { border-bottom:none; }
+    .more-dropdown a:hover { background:rgba(255,215,0,0.07); color:#FFD700; }
+    .more-dropdown a .icon { font-size:16px; width:20px; text-align:center; }
+
+    /* NAVBAR SEARCH */
+    .nav-search-wrap { position:relative; margin-left:8px; }
+    .nav-search-input {
+      background: rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.12);
+      color:white; padding:7px 36px 7px 14px; border-radius:20px;
+      font-size:13px; font-family:'DM Sans',sans-serif; width:0; opacity:0;
+      transition:all 0.3s; outline:none; cursor:pointer;
+    }
+    .nav-search-wrap.open .nav-search-input { width:200px; opacity:1; cursor:text; border-color:rgba(255,215,0,0.3); }
+    .nav-search-icon {
+      position:absolute; right:10px; top:50%; transform:translateY(-50%);
+      cursor:pointer; font-size:14px; color:rgba(255,255,255,0.5); transition:color 0.2s;
+    }
+    .nav-search-wrap.open .nav-search-icon { color:#FFD700; }
+    .nav-search-input::placeholder { color:rgba(255,255,255,0.3); }
+    .nav-search-input:focus { border-color:rgba(255,215,0,0.5); background:rgba(255,255,255,0.1); }
+    .nav-dropdown {
+      display:none; position:absolute; top:calc(100% + 8px); right:0;
+      background:#0f1623; border:1px solid rgba(255,215,0,0.2); border-radius:14px;
+      overflow:hidden; z-index:999; box-shadow:0 20px 60px rgba(0,0,0,0.7);
+      width:280px; max-height:360px; overflow-y:auto;
+    }
+
+    /* HERO */
+    .hero {
+      background: url("/images/stadium6.jpg") no-repeat center center/cover;
+      min-height: 100vh; display:flex; flex-direction:column;
+      align-items:center; justify-content:center;
+      text-align:center; padding:20px; position:relative;
+      padding-top: 70px;
+    }
+    .hero::after {
+      content:''; position:absolute; inset:0;
+      background:linear-gradient(to bottom, rgba(8,12,20,0.55) 0%, rgba(8,12,20,0.8) 100%);
+      z-index:1;
+    }
+    .hero-content { position:relative; z-index:2; display:flex; flex-direction:column; align-items:center; gap:16px; }
+    .hero-eyebrow { font-family:'Bebas Neue',sans-serif; font-size:22px; letter-spacing:6px; text-transform:uppercase; color:#FFA500; }
+    .hero h2 { font-family:'Bebas Neue',sans-serif; font-size:72px; line-height:1; letter-spacing:3px; color:white; margin:0; }
+    .hero h2 span { color:#FFD700; }
+    .hero p { font-size:18px; color:rgba(255,255,255,0.6); max-width:500px; margin:0; }
+    .hero-buttons { display:flex; gap:14px; margin-top:4px; flex-wrap:wrap; justify-content:center; }
+    .btn { background:#f70404; border:none; padding:14px 32px; color:white; font-size:15px; font-weight:700; font-family:'DM Sans',sans-serif; border-radius:30px; cursor:pointer; transition:all 0.2s; text-decoration:none; display:inline-block; }
+    .btn:hover { background:#ff3333; transform:translateY(-2px); }
+    .btn-outline { background:transparent; border:1px solid rgba(255,215,0,0.4); padding:13px 30px; color:#FFD700; font-size:15px; font-weight:700; font-family:'DM Sans',sans-serif; border-radius:30px; cursor:pointer; transition:all 0.2s; text-decoration:none; display:inline-block; }
+    .btn-outline:hover { background:rgba(255,215,0,0.1); transform:translateY(-2px); }
+
+    /* HERO SEARCH */
+    .hero-search-wrap { position:relative; width:100%; max-width:520px; margin-top:8px; }
+    .hero-search-input {
+      width:100%; padding:16px 50px 16px 20px; border-radius:14px;
+      border:1px solid rgba(255,215,0,0.3); background:rgba(255,255,255,0.07);
+      backdrop-filter:blur(10px); color:white; font-size:15px;
+      font-family:'DM Sans',sans-serif; font-weight:500; outline:none; transition:all 0.2s;
+    }
+    .hero-search-input:focus { border-color:rgba(255,215,0,0.6); background:rgba(255,255,255,0.1); }
+    .hero-search-input::placeholder { color:rgba(255,255,255,0.35); }
+    .hero-search-spinner {
+      display:none; position:absolute; right:16px; top:50%; transform:translateY(-50%);
+      width:18px; height:18px; border:2px solid rgba(255,215,0,0.2);
+      border-top-color:#FFD700; border-radius:50%; animation:spin2 0.8s linear infinite;
+    }
+    @keyframes spin2 { to{transform:translateY(-50%) rotate(360deg)} }
+    .hero-dropdown {
+      display:none; position:absolute; top:calc(100% + 8px); left:0; right:0;
+      background:#0f1623; border:1px solid rgba(255,215,0,0.2); border-radius:14px;
+      overflow:hidden; z-index:999; box-shadow:0 20px 60px rgba(0,0,0,0.7);
+      max-height:380px; overflow-y:auto;
+    }
+
+    /* SHARED DROPDOWN STYLES */
+    .search-result-item { display:flex; align-items:center; gap:12px; padding:12px 16px; cursor:pointer; transition:background 0.15s; border-bottom:1px solid rgba(255,255,255,0.04); text-decoration:none; }
+    .search-result-item:last-child { border-bottom:none; }
+    .search-result-item:hover { background:rgba(255,215,0,0.07); }
+    .search-result-crest { width:32px; height:32px; object-fit:contain; flex-shrink:0; }
+    .search-result-info { flex:1; }
+    .search-result-name { font-weight:700; font-size:14px; color:white; }
+    .search-result-meta { font-size:11px; color:rgba(255,255,255,0.4); margin-top:2px; }
+    .search-result-pos { font-family:'Bebas Neue',sans-serif; font-size:20px; color:#FFD700; min-width:28px; text-align:right; }
+    .search-no-results { padding:24px; text-align:center; color:rgba(255,255,255,0.35); font-size:14px; }
+
+    /* QUICK LINKS */
+    .quick-section { background:#0a0e17; padding:0 20px; }
+    .quick-links {
+      max-width:1100px; margin:0 auto; background:#0f1623;
+      border-radius:20px; border:1px solid rgba(255,215,0,0.1);
+      box-shadow:0 24px 60px rgba(0,0,0,0.5);
+      display:grid; grid-template-columns:repeat(auto-fit, minmax(200px,1fr));
+      gap:16px; padding:32px; transform:translateY(-40px);
+    }
+    .quick-card { background:#141d2e; border-radius:14px; padding:20px; text-decoration:none; color:white; border:1px solid rgba(255,255,255,0.06); transition:all 0.2s; display:flex; flex-direction:column; gap:8px; }
+    .quick-card:hover { border-color:rgba(255,215,0,0.3); background:rgba(255,215,0,0.05); transform:translateY(-3px); }
+    .quick-card .icon { font-size:28px; }
+    .quick-card .title { font-weight:700; font-size:15px; }
+    .quick-card .desc { font-size:12px; color:rgba(255,255,255,0.4); }
+
+    /* MORE FEATURES SECTION */
+    .more-features-section { max-width:1100px; margin:0 auto 60px; padding:0 20px; }
+    .section-title { font-family:'Bebas Neue',sans-serif; font-size:36px; letter-spacing:2px; color:white; margin-bottom:8px; }
+    .section-title span { color:#FFD700; }
+    .section-sub { font-size:14px; color:rgba(255,255,255,0.4); margin-bottom:28px; }
+    .feature-cards {
+      display:grid; grid-template-columns:repeat(auto-fit, minmax(220px,1fr)); gap:16px;
+    }
+    .feature-card {
+      background:linear-gradient(135deg, #141d2e, #0f1825);
+      border-radius:16px; padding:24px; text-decoration:none; color:white;
+      border:1px solid rgba(255,255,255,0.07); transition:all 0.25s;
+      display:flex; flex-direction:column; gap:10px; position:relative; overflow:hidden;
+    }
+    .feature-card::before {
+      content:''; position:absolute; inset:0; opacity:0; transition:opacity 0.25s;
+      background:linear-gradient(135deg, rgba(255,215,0,0.05), transparent);
+    }
+    .feature-card:hover::before { opacity:1; }
+    .feature-card:hover { border-color:rgba(255,215,0,0.25); transform:translateY(-4px); box-shadow:0 16px 40px rgba(0,0,0,0.4); }
+    .feature-card .f-icon { font-size:32px; }
+    .feature-card .f-title { font-weight:700; font-size:16px; }
+    .feature-card .f-desc { font-size:12px; color:rgba(255,255,255,0.4); line-height:1.5; }
+    .feature-card .f-badge {
+      display:inline-block; background:rgba(255,215,0,0.12); color:#FFD700;
+      font-size:10px; font-weight:700; padding:3px 8px; border-radius:20px;
+      letter-spacing:0.5px; align-self:flex-start;
+    }
+
+    .news-section { max-width:1100px; margin:0 auto 60px; padding:0 20px; text-align:center; }
+
+    footer { background:#080c14; border-top:1px solid rgba(255,215,0,0.08); text-align:center; padding:24px; font-size:13px; color:rgba(255,255,255,0.3); }
+
+    @media (max-width:768px) {
+      header { padding:0 16px; }
+      nav a { font-size:12px; padding:6px 10px; }
+      .hero h2 { font-size:44px; }
+      .quick-links { transform:translateY(-20px); padding:20px; }
+      .nav-search-wrap { display:none; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <img src="/images/logo2.jpg" alt="Football Logo" class="logo">
+    <nav>
+      <ul>
+        <li><a href="/">Home</a></li>
+        <li><a href="/localTeams">Local Matches</a></li>
+        <li><a href="/footBall">Live Matches</a></li>
+        <li><a href="/standings">🏆 Standings</a></li>
+        <li><a href="/fixtures">📅 Fixtures</a></li>
+        <li><a href="/scorers">⚽ Scorers</a></li>
+        <li><a href="/champions-league">🏆 UCL</a></li>
+        <li class="nav-more" id="nav-more">
+          <button class="nav-more-btn" onclick="toggleMore()">More <span class="arrow">▾</span></button>
+          <div class="more-dropdown">
+            <a href="/quiz"><span class="icon">🧠</span> Football Quiz</a>
+            <a href="/compare"><span class="icon">⚖️</span> Player Compare</a>
+            <a href="/history"><span class="icon">🏅</span> League History</a>
+            <a href="/today"><span class="icon">📅</span> Today's Matches</a>
+            <a href="/local-match"><span class="icon">⚽</span> Local Match</a>
+            <a href="/news"><span class="icon">📰</span> News</a>
+          </div>
+        </li>
+        <li><a href="/about">About</a></li>
+        <li>
+          <div class="nav-search-wrap" id="nav-search-wrap">
+            <input type="text" class="nav-search-input" id="nav-search" placeholder="Search team..." autocomplete="off">
+            <span class="nav-search-icon" id="nav-search-icon" onclick="toggleNavSearch()">🔍</span>
+            <div class="nav-dropdown" id="nav-dropdown"></div>
+          </div>
+        </li>
+        <li><a href="/loginpage" class="login-btn">Login</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <div class="hero-content">
+      <span class="hero-eyebrow">⚽ The Football Desk</span>
+      <h2>Ultimate <span>Football</span> Hub</h2>
+      <p>Your #1 source for live scores, standings, fixtures and stats.</p>
+
+      <div class="hero-search-wrap">
+        <input type="text" class="hero-search-input" id="hero-search" placeholder="🔍 Search for any team..." autocomplete="off">
+        <div class="hero-search-spinner" id="hero-spinner"></div>
+        <div class="hero-dropdown" id="hero-dropdown"></div>
+      </div>
+
+      <div class="hero-buttons">
+        <a href="/news" class="btn">World Of Football</a>
+        <a href="/standings" class="btn-outline">View Standings</a>
+      </div>
+    </div>
+  </section>
+
+  <div class="quick-section">
+    <div class="quick-links">
+      <a href="/standings" class="quick-card"><span class="icon">🏆</span><span class="title">League Tables</span><span class="desc">Live standings for all 5 top leagues</span></a>
+      <a href="/fixtures" class="quick-card"><span class="icon">📅</span><span class="title">Fixtures</span><span class="desc">Upcoming matches and results</span></a>
+      <a href="/scorers" class="quick-card"><span class="icon">⚽</span><span class="title">Top Scorers</span><span class="desc">Golden Boot race 2025/26</span></a>
+      <a href="/localTeams" class="quick-card"><span class="icon">🏟️</span><span class="title">Local Matches</span><span class="desc">Track your local team matches</span></a>
+      <a href="/news" class="quick-card"><span class="icon">📰</span><span class="title">Football News</span><span class="desc">Latest updates and stories</span></a>
+    </div>
+  </div>
+
+  <!-- MORE FEATURES SECTION -->
+  <div class="more-features-section">
+    <h2 class="section-title">More <span>Features</span></h2>
+    <p class="section-sub">Explore everything Football Hub has to offer</p>
+    <div class="feature-cards">
+      <a href="/quiz" class="feature-card">
+        <span class="f-icon">🧠</span>
+        <span class="f-title">Football Quiz</span>
+        <span class="f-desc">Test your football knowledge. AI-generated questions across History, Players, World Cup and more.</span>
+        <span class="f-badge">AI POWERED</span>
+      </a>
+      <a href="/compare" class="feature-card">
+        <span class="f-icon">⚖️</span>
+        <span class="f-title">Player Comparison</span>
+        <span class="f-desc">Go head-to-head — compare goals, assists and stats from any two top league players.</span>
+        <span class="f-badge">LIVE STATS</span>
+      </a>
+      <a href="/history" class="feature-card">
+        <span class="f-icon">🏅</span>
+        <span class="f-title">League History</span>
+        <span class="f-desc">30 years of champions, records and fun facts for all top 5 leagues.</span>
+        <span class="f-badge">INTERACTIVE</span>
+      </a>
+      <a href="/today" class="feature-card">
+        <span class="f-icon">📅</span>
+        <span class="f-title">Today's Matches</span>
+        <span class="f-desc">All matches happening today across every top league in one place.</span>
+        <span class="f-badge">LIVE</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="news-section">
+    <h2 class="section-title">Latest <span>Football</span> News</h2>
+    <p class="section-sub">Stay updated with the latest football news and match updates.</p>
+  </div>
+
+  <footer><p>&copy; 2026 Football World. All rights reserved.</p></footer>
+
+  <script>
+    // ── MORE DROPDOWN ──────────────────────────────────────
+    function toggleMore() {
+      document.getElementById('nav-more').classList.toggle('open');
+    }
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('#nav-more')) document.getElementById('nav-more').classList.remove('open');
+    });
+
+    // Transparent navbar — becomes solid on scroll
+    const header = document.querySelector('header');
+    function handleScroll() {
+      if (window.scrollY > 40) header.classList.add('scrolled');
+      else header.classList.remove('scrolled');
+    }
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+
+    // ── TEAM SEARCH ────────────────────────────────────────
+    let allTeams = null;
+    let loadingTeams = false;
+
+    async function fetchAllTeams() {
+      if (allTeams) return allTeams;
+      if (loadingTeams) return null;
+      loadingTeams = true;
+      try {
+        const res = await fetch('/api/teams/all');
+        const data = await res.json();
+        allTeams = data.teams || [];
+      } catch(e) { allTeams = []; }
+      loadingTeams = false;
+      return allTeams;
+    }
+
+    function buildDropdownHTML(teams) {
+      if (!teams || teams.length === 0) return '<div class="search-no-results">No teams found</div>';
+      return teams.map(t => `
+        <a class="search-result-item" href="/team/${t.id}">
+          ${t.crest ? `<img class="search-result-crest" src="/api/crest?url=${encodeURIComponent(t.crest)}" onerror="this.style.display='none'">` : '<div style="width:32px;height:32px;background:rgba(255,215,0,0.1);border-radius:50%;flex-shrink:0;"></div>'}
+          <div class="search-result-info">
+            <div class="search-result-name">${t.name}</div>
+            <div class="search-result-meta">${t.leagueName}</div>
+          </div>
+          <div class="search-result-pos">${t.position}</div>
+        </a>
+      `).join('');
+    }
+
+    function filterTeams(q) {
+      if (!allTeams) return [];
+      return allTeams.filter(t =>
+        t.name.toLowerCase().includes(q) ||
+        (t.shortName && t.shortName.toLowerCase().includes(q)) ||
+        (t.tla && t.tla.toLowerCase().includes(q))
+      ).slice(0, 8);
+    }
+
+    let heroTimeout = null;
+    const heroInput = document.getElementById('hero-search');
+    const heroDropdown = document.getElementById('hero-dropdown');
+    const heroSpinner = document.getElementById('hero-spinner');
+
+    heroInput.addEventListener('focus', () => fetchAllTeams());
+    heroInput.addEventListener('input', (e) => {
+      clearTimeout(heroTimeout);
+      const q = e.target.value.trim().toLowerCase();
+      if (q.length < 2) { heroDropdown.style.display = 'none'; return; }
+      heroSpinner.style.display = 'block';
+      heroTimeout = setTimeout(async () => {
+        await fetchAllTeams();
+        heroSpinner.style.display = 'none';
+        const filtered = filterTeams(q);
+        heroDropdown.innerHTML = buildDropdownHTML(filtered);
+        heroDropdown.style.display = 'block';
+      }, 200);
+    });
+
+    let navTimeout = null;
+    const navWrap = document.getElementById('nav-search-wrap');
+    const navInput = document.getElementById('nav-search');
+    const navDropdown = document.getElementById('nav-dropdown');
+
+    function toggleNavSearch() {
+      navWrap.classList.toggle('open');
+      if (navWrap.classList.contains('open')) { navInput.focus(); fetchAllTeams(); }
+      else { navDropdown.style.display = 'none'; navInput.value = ''; }
+    }
+
+    navInput.addEventListener('input', (e) => {
+      clearTimeout(navTimeout);
+      const q = e.target.value.trim().toLowerCase();
+      if (q.length < 2) { navDropdown.style.display = 'none'; return; }
+      navTimeout = setTimeout(async () => {
+        await fetchAllTeams();
+        const filtered = filterTeams(q);
+        navDropdown.innerHTML = buildDropdownHTML(filtered);
+        navDropdown.style.display = 'block';
+      }, 200);
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.hero-search-wrap')) heroDropdown.style.display = 'none';
+      if (!e.target.closest('#nav-search-wrap')) navDropdown.style.display = 'none';
+    });
+
+    const currentPath = window.location.pathname;
+    document.querySelectorAll('nav a').forEach(a => {
+      if (a.getAttribute('href') === currentPath) a.classList.add('active');
+    });
+  </script>
+  <script src="/javascripts/chatbot.js"></script>
+  <script src="/javascripts/polish.js"></script>
+
+</body>
+</html>

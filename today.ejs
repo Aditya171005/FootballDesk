@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Today's Matches | Football Hub</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'DM Sans', sans-serif; background: #0a0e17; color: white; min-height: 100vh; }
+
+    header { background: rgba(8,12,20,0.95); backdrop-filter: blur(12px); padding: 0 40px; display: flex; justify-content: space-between; align-items: center; position: fixed; top:0; left:0; right:0; z-index: 200; height: 70px; border-bottom: 1px solid rgba(255,215,0,0.1); }
+    .logo { height: 50px; width: auto; }
+    nav ul { display:flex; gap:4px; list-style:none; padding:0; margin:0; align-items:center; }
+    nav a { color:rgba(255,255,255,0.7); text-decoration:none; font-weight:600; font-size:13px; padding:7px 13px; border-radius:8px; transition:all 0.2s; }
+    nav a:hover { color:#FFD700; background:rgba(255,215,0,0.08); }
+    nav a.login-btn { background:#f70404; color:white; border-radius:20px; padding:7px 18px; }
+    .nav-more { position:relative; }
+    .nav-more-btn { color:rgba(255,255,255,0.7); background:none; border:none; font-weight:600; font-size:13px; padding:7px 13px; border-radius:8px; cursor:pointer; font-family:'DM Sans',sans-serif; transition:all 0.2s; display:flex; align-items:center; gap:4px; }
+    .nav-more-btn:hover { color:#FFD700; background:rgba(255,215,0,0.08); }
+    .nav-more-btn .arrow { font-size:10px; transition:transform 0.2s; }
+    .nav-more.open .nav-more-btn .arrow { transform:rotate(180deg); }
+    .more-dropdown { display:none; position:absolute; top:calc(100% + 8px); right:0; background:#0f1623; border:1px solid rgba(255,215,0,0.2); border-radius:14px; overflow:hidden; z-index:999; box-shadow:0 20px 60px rgba(0,0,0,0.7); min-width:200px; }
+    .nav-more.open .more-dropdown { display:block; }
+    .more-dropdown a { display:flex; align-items:center; gap:10px; padding:11px 16px; color:rgba(255,255,255,0.8); text-decoration:none; font-size:13px; font-weight:600; transition:all 0.15s; border-bottom:1px solid rgba(255,255,255,0.04); }
+    .more-dropdown a:last-child { border-bottom:none; }
+    .more-dropdown a:hover { background:rgba(255,215,0,0.07); color:#FFD700; }
+
+    .page { padding: 100px 20px 60px; max-width: 900px; margin: 0 auto; }
+    .page-header { text-align:center; margin-bottom:40px; }
+    .page-header h1 { font-family:'Bebas Neue',sans-serif; font-size:56px; letter-spacing:3px; }
+    .page-header h1 span { color:#FFD700; }
+    .date-badge { display:inline-block; background:rgba(255,215,0,0.1); border:1px solid rgba(255,215,0,0.2); color:#FFD700; padding:6px 16px; border-radius:20px; font-size:14px; font-weight:700; margin-top:10px; }
+
+    /* LOADING */
+    .loading-wrap { text-align:center; padding:80px 0; }
+    .spinner { width:48px; height:48px; border:3px solid rgba(255,215,0,0.15); border-top-color:#FFD700; border-radius:50%; animation:spin 0.9s linear infinite; margin:0 auto 16px; }
+    @keyframes spin { to{transform:rotate(360deg)} }
+    .loading-text { color:rgba(255,255,255,0.5); }
+
+    /* NO MATCHES */
+    .no-matches { text-align:center; padding:80px 20px; }
+    .no-matches .emoji { font-size:64px; margin-bottom:16px; }
+    .no-matches h3 { font-family:'Bebas Neue',sans-serif; font-size:28px; color:rgba(255,255,255,0.6); margin-bottom:8px; }
+    .no-matches p { color:rgba(255,255,255,0.35); }
+
+    /* LEAGUE GROUP */
+    .league-group { margin-bottom:32px; }
+    .league-header { display:flex; align-items:center; gap:12px; margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid rgba(255,255,255,0.06); }
+    .league-name { font-family:'Bebas Neue',sans-serif; font-size:22px; color:white; letter-spacing:1px; }
+    .league-count { background:rgba(255,215,0,0.1); color:#FFD700; font-size:12px; font-weight:700; padding:3px 10px; border-radius:20px; }
+
+    /* MATCH CARDS */
+    .match-card {
+      background:#0f1623; border-radius:14px; border:1px solid rgba(255,255,255,0.07);
+      padding:18px 20px; margin-bottom:10px; display:grid;
+      grid-template-columns:1fr auto 1fr; align-items:center; gap:12px;
+      transition:all 0.2s;
+    }
+    .match-card:hover { border-color:rgba(255,215,0,0.2); background:rgba(255,215,0,0.03); }
+    .match-card.live { border-color:rgba(0,204,102,0.3); }
+
+    .team-side { display:flex; align-items:center; gap:10px; }
+    .team-side.away { flex-direction:row-reverse; }
+    .team-crest { width:32px; height:32px; object-fit:contain; flex-shrink:0; }
+    .team-name { font-weight:700; font-size:14px; color:white; }
+    .team-side.away .team-name { text-align:right; }
+
+    .match-center { text-align:center; min-width:90px; }
+    .match-time { font-family:'Bebas Neue',sans-serif; font-size:18px; color:#FFD700; letter-spacing:1px; }
+    .match-score { font-family:'Bebas Neue',sans-serif; font-size:28px; color:white; letter-spacing:2px; }
+    .match-status {
+      font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px;
+      padding:2px 8px; border-radius:10px; margin-top:4px; display:inline-block;
+    }
+    .status-scheduled { background:rgba(255,255,255,0.07); color:rgba(255,255,255,0.4); }
+    .status-live { background:rgba(0,204,102,0.15); color:#00cc66; animation:pulse-live 2s infinite; }
+    .status-finished { background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.3); }
+    .status-postponed { background:rgba(255,68,68,0.1); color:#ff6464; }
+    @keyframes pulse-live { 0%,100%{opacity:1} 50%{opacity:0.6} }
+
+    .total-badge { text-align:center; margin-bottom:24px; }
+    .total-badge span { background:#0f1623; border:1px solid rgba(255,215,0,0.15); color:rgba(255,255,255,0.6); font-size:13px; padding:8px 20px; border-radius:20px; }
+    .total-badge strong { color:#FFD700; }
+
+    footer { background:#080c14; border-top:1px solid rgba(255,215,0,0.08); text-align:center; padding:24px; font-size:13px; color:rgba(255,255,255,0.3); margin-top:60px; }
+
+    @media(max-width:520px) {
+      .team-name { font-size:12px; }
+      .match-card { padding:14px; gap:8px; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <img src="/images/logo2.jpg" alt="Logo" class="logo">
+    <nav>
+      <ul>
+        <li><a href="/">Home</a></li>
+        <li><a href="/standings">🏆 Standings</a></li>
+        <li><a href="/fixtures">📅 Fixtures</a></li>
+        <li><a href="/scorers">⚽ Scorers</a></li>
+        <li class="nav-more" id="nav-more">
+          <button class="nav-more-btn" onclick="toggleMore()">More <span class="arrow">▾</span></button>
+          <div class="more-dropdown">
+            <a href="/quiz">🧠 Football Quiz</a>
+            <a href="/compare">⚖️ Player Compare</a>
+            <a href="/history">🏅 League History</a>
+            <a href="/today" style="color:#FFD700;">📅 Today's Matches</a>
+            <a href="/news">📰 News</a>
+          </div>
+        </li>
+        <li><a href="/loginpage" class="login-btn">Login</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <div class="page">
+    <div class="page-header">
+      <h1>Today's <span>Matches</span></h1>
+      <div class="date-badge" id="date-badge">Loading...</div>
+    </div>
+
+    <div id="content">
+      <div class="loading-wrap">
+        <div class="spinner"></div>
+        <p class="loading-text">Fetching today's matches...</p>
+      </div>
+    </div>
+  </div>
+
+  <footer><p>&copy; 2026 Football World. All rights reserved.</p></footer>
+
+  <script>
+    function toggleMore() { document.getElementById('nav-more').classList.toggle('open'); }
+    document.addEventListener('click', (e) => { if (!e.target.closest('#nav-more')) document.getElementById('nav-more').classList.remove('open'); });
+
+    function getStatusClass(status) {
+      if (['SCHEDULED','TIMED'].includes(status)) return 'status-scheduled';
+      if (['IN_PLAY','PAUSED','HALFTIME'].includes(status)) return 'status-live';
+      if (status === 'FINISHED') return 'status-finished';
+      if (status === 'POSTPONED') return 'status-postponed';
+      return 'status-scheduled';
+    }
+
+    function getStatusLabel(status) {
+      const map = { SCHEDULED: 'Scheduled', TIMED: 'Scheduled', IN_PLAY: '🔴 Live', PAUSED: '⏸ HT', HALFTIME: '⏸ HT', FINISHED: 'FT', POSTPONED: 'Postponed', CANCELLED: 'Cancelled' };
+      return map[status] || status;
+    }
+
+    function isLive(status) { return ['IN_PLAY','PAUSED','HALFTIME'].includes(status); }
+
+    async function loadTodayMatches() {
+      try {
+        const res = await fetch('/api/today/matches');
+        const data = await res.json();
+
+        // Set date
+        const today = new Date();
+        document.getElementById('date-badge').textContent = today.toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+
+        const content = document.getElementById('content');
+        const grouped = data.grouped || {};
+        const leagues = Object.keys(grouped);
+
+        if (leagues.length === 0) {
+          content.innerHTML = `
+            <div class="no-matches">
+              <div class="emoji">📅</div>
+              <h3>No Matches Today</h3>
+              <p>Enjoy the rest day — check back tomorrow for action!</p>
+            </div>
+          `;
+          return;
+        }
+
+        let totalMatches = 0;
+        leagues.forEach(code => { totalMatches += grouped[code].matches.length; });
+
+        let html = `<div class="total-badge"><span><strong>${totalMatches}</strong> matches across <strong>${leagues.length}</strong> leagues today</span></div>`;
+
+        leagues.forEach(code => {
+          const lg = grouped[code];
+          html += `
+            <div class="league-group">
+              <div class="league-header">
+                <span class="league-name">${lg.name}</span>
+                <span class="league-count">${lg.matches.length} matches</span>
+              </div>
+          `;
+
+          lg.matches.forEach(m => {
+            const time = new Date(m.utcDate).toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
+            const live = isLive(m.status);
+            const finished = m.status === 'FINISHED';
+            const score = finished || live
+              ? `<div class="match-score">${m.score?.fullTime?.home ?? '?'} – ${m.score?.fullTime?.away ?? '?'}</div>`
+              : `<div class="match-time">${time}</div>`;
+
+            html += `
+              <div class="match-card ${live ? 'live' : ''}">
+                <div class="team-side">
+                  ${m.homeTeam?.crest ? `<img class="team-crest" src="/api/crest?url=${encodeURIComponent(m.homeTeam.crest)}" onerror="this.style.display='none'">` : ''}
+                  <span class="team-name">${m.homeTeam?.name || 'TBD'}</span>
+                </div>
+                <div class="match-center">
+                  ${score}
+                  <div><span class="match-status ${getStatusClass(m.status)}">${getStatusLabel(m.status)}</span></div>
+                </div>
+                <div class="team-side away">
+                  ${m.awayTeam?.crest ? `<img class="team-crest" src="/api/crest?url=${encodeURIComponent(m.awayTeam.crest)}" onerror="this.style.display='none'">` : ''}
+                  <span class="team-name">${m.awayTeam?.name || 'TBD'}</span>
+                </div>
+              </div>
+            `;
+          });
+
+          html += `</div>`;
+        });
+
+        content.innerHTML = html;
+      } catch(e) {
+        document.getElementById('content').innerHTML = `
+          <div class="no-matches">
+            <div class="emoji">⚠️</div>
+            <h3>Failed to Load</h3>
+            <p>Could not fetch today's matches. Please try again.</p>
+          </div>
+        `;
+      }
+    }
+
+    loadTodayMatches();
+  </script>
+  <script src="/javascripts/chatbot.js"></script>
+</body>
+</html>

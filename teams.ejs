@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= team.name %> — Football Hub</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --gold: #FFD700; --gold2: #FFA500;
+      --bg: #080c14; --card: #0f1623; --card2: #141d2e;
+      --border: rgba(255,215,0,0.12); --text: #e8eaf0;
+      --muted: rgba(255,255,255,0.4);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: 'DM Sans', sans-serif; min-height: 100vh; padding: 28px 20px;
+      background-image: radial-gradient(ellipse 80% 50% at 10% 0%, rgba(255,165,0,0.07) 0%, transparent 60%);
+    }
+
+    /* HEADER */
+    .header {
+      max-width: 1100px; margin: 0 auto 32px;
+      display: flex; justify-content: space-between; align-items: center;
+      padding-bottom: 20px; border-bottom: 1px solid var(--border);
+    }
+    .nav-btn {
+      background: transparent; color: var(--muted); padding: 9px 20px; border-radius: 30px;
+      text-decoration: none; font-weight: 500; font-size: 13px;
+      border: 1px solid rgba(255,255,255,0.12); transition: all 0.2s;
+    }
+    .nav-btn:hover { border-color: var(--gold); color: var(--gold); }
+    .header-right { display: flex; gap: 10px; }
+
+    /* TEAM HERO */
+    .team-hero {
+      max-width: 1100px; margin: 0 auto 32px;
+      background: var(--card); border-radius: 20px;
+      border: 1px solid var(--border);
+      padding: 36px 40px;
+      display: flex; align-items: center; gap: 32px;
+      background-image: linear-gradient(135deg, rgba(255,165,0,0.06) 0%, transparent 60%);
+      box-shadow: 0 24px 80px rgba(0,0,0,0.4);
+    }
+    .team-crest-large {
+      width: 100px; height: 100px; object-fit: contain;
+      filter: drop-shadow(0 4px 20px rgba(255,215,0,0.2));
+      flex-shrink: 0;
+    }
+    .team-crest-placeholder {
+      width: 100px; height: 100px; border-radius: 50%;
+      background: linear-gradient(135deg, rgba(255,165,0,0.2), rgba(30,80,180,0.3));
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Bebas Neue', sans-serif; font-size: 36px; color: var(--gold);
+      flex-shrink: 0;
+    }
+    .team-info { flex: 1; }
+    .team-league-badge {
+      display: inline-block; padding: 4px 12px; border-radius: 20px;
+      background: rgba(255,215,0,0.1); border: 1px solid rgba(255,215,0,0.2);
+      font-size: 11px; font-weight: 700; letter-spacing: 1.5px; color: var(--gold);
+      text-transform: uppercase; margin-bottom: 10px;
+    }
+    .team-name-large {
+      font-family: 'Bebas Neue', sans-serif; font-size: 48px;
+      line-height: 1; color: white; letter-spacing: 2px; margin-bottom: 8px;
+    }
+    .team-meta { font-size: 13px; color: var(--muted); }
+
+    .position-badge {
+      display: flex; flex-direction: column; align-items: center;
+      background: var(--card2); border-radius: 16px; padding: 20px 28px;
+      border: 1px solid var(--border); min-width: 100px; text-align: center;
+    }
+    .position-num {
+      font-family: 'Bebas Neue', sans-serif; font-size: 52px;
+      color: var(--gold); line-height: 1;
+    }
+    .position-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
+
+    /* STATS GRID */
+    .stats-grid {
+      max-width: 1100px; margin: 0 auto 28px;
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px;
+    }
+    .stat-card {
+      background: var(--card); border-radius: 14px; padding: 20px 22px;
+      border: 1px solid rgba(255,255,255,0.06); text-align: center;
+      transition: border-color 0.2s;
+    }
+    .stat-card:hover { border-color: rgba(255,215,0,0.2); }
+    .stat-num { font-family: 'Bebas Neue', sans-serif; font-size: 38px; color: var(--gold); line-height: 1; }
+    .stat-label { font-size: 11px; color: var(--muted); margin-top: 6px; text-transform: uppercase; letter-spacing: 1px; }
+    .stat-sub { font-size: 12px; color: rgba(255,255,255,0.3); margin-top: 3px; }
+
+    /* FORM */
+    .section-card {
+      max-width: 1100px; margin: 0 auto 24px;
+      background: var(--card); border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.06); overflow: hidden;
+    }
+    .section-head {
+      padding: 16px 24px; border-bottom: 1px solid rgba(255,255,255,0.05);
+      background: rgba(255,255,255,0.02);
+      font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 1px; color: var(--gold);
+    }
+    .section-body { padding: 20px 24px; }
+
+    .form-pills { display: flex; gap: 10px; flex-wrap: wrap; }
+    .form-pill {
+      width: 40px; height: 40px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 15px;
+    }
+    .form-W { background: rgba(0,255,135,0.15); color: #00ff87; border: 1px solid rgba(0,255,135,0.3); }
+    .form-D { background: rgba(255,215,0,0.1); color: var(--gold); border: 1px solid rgba(255,215,0,0.2); }
+    .form-L { background: rgba(255,68,68,0.15); color: #ff4444; border: 1px solid rgba(255,68,68,0.3); }
+    .form-label { font-size: 12px; color: var(--muted); margin-top: 12px; }
+
+    /* RECORD TABLE */
+    .record-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+    .record-table th {
+      padding: 10px 0; text-align: center; font-size: 13px; font-weight: 700;
+      letter-spacing: 1.5px; text-transform: uppercase; color: rgba(255,215,0,0.75);
+      width: 18%;
+    }
+    .record-table th:first-child { text-align: left; width: 28%; }
+    .record-table td {
+      padding: 18px 0; border-top: 1px solid rgba(255,255,255,0.06);
+      text-align: center; font-weight: 700; font-size: 20px; width: 18%;
+    }
+    .record-table td:first-child { text-align: left; font-size: 16px; font-weight: 600; width: 28%; }
+    .home-row td { background: rgba(255,255,255,0.02); color: rgba(255,255,255,0.95); }
+    .away-row td { color: rgba(255,255,255,0.8); }
+
+    /* FIXTURES */
+    .fixture-item {
+      display: grid; grid-template-columns: 1fr auto 1fr;
+      align-items: center; gap: 12px;
+      padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .fixture-item:last-child { border-bottom: none; }
+    .fix-team { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 14px; }
+    .fix-crest { width: 24px; height: 24px; object-fit: contain; }
+    .fix-center { text-align: center; display: flex; flex-direction: column; gap: 4px; align-items: center; }
+    .fix-score { font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 2px; color: white; }
+    .fix-date { font-size: 11px; color: var(--muted); }
+    .fix-badge {
+      padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 700; text-transform: uppercase;
+    }
+    .fix-FT { background: rgba(255,255,255,0.05); color: var(--muted); border: 1px solid rgba(255,255,255,0.1); }
+    .fix-UP { background: rgba(255,215,0,0.08); color: var(--gold); border: 1px solid rgba(255,215,0,0.2); }
+    .fix-LIVE { background: rgba(0,255,135,0.1); color: #00ff87; border: 1px solid rgba(0,255,135,0.2); }
+    .fix-team-highlight { color: var(--gold); }
+
+    .loading-state { display: flex; flex-direction: column; align-items: center; padding: 40px; gap: 14px; }
+    .spinner { width: 36px; height: 36px; border: 3px solid rgba(255,215,0,0.1); border-top-color: var(--gold); border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to{transform:rotate(360deg)} }
+    .loading-text { font-size: 13px; color: var(--muted); }
+
+    @media (max-width: 640px) {
+      .team-hero { flex-direction: column; align-items: flex-start; gap: 20px; padding: 24px; }
+      .team-name-large { font-size: 36px; }
+      .position-badge { flex-direction: row; gap: 12px; align-items: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div>
+      <div style="font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--gold2);margin-bottom:6px;">⚽ Team Profile</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:2px;color:white;"><%= team.name %></div>
+    </div>
+    <div class="header-right">
+      <a href="/standings" class="nav-btn">📊 Standings</a>
+      <a href="/fixtures" class="nav-btn">📅 Fixtures</a>
+      <a href="/" class="nav-btn">← Home</a>
+    </div>
+  </div>
+
+  <!-- TEAM HERO -->
+  <div class="team-hero">
+    <% if (team.crest) { %>
+      <img class="team-crest-large" src="/api/crest?url=<%= encodeURIComponent(team.crest) %>" alt="<%= team.name %>" onerror="this.style.display='none'">
+    <% } else { %>
+      <div class="team-crest-placeholder"><%= team.tla || team.name.substring(0,2).toUpperCase() %></div>
+    <% } %>
+    <div class="team-info">
+      <span class="team-league-badge"><%= leagueName %></span>
+      <div class="team-name-large"><%= team.name %></div>
+      <div class="team-meta">
+        <% if (team.venue) { %>🏟️ <%= team.venue %> &nbsp;·&nbsp;<% } %>
+        <% if (team.founded) { %>📅 Founded <%= team.founded %> &nbsp;·&nbsp;<% } %>
+        <% if (team.area && team.area.name) { %>🌍 <%= team.area.name %><% } %>
+      </div>
+    </div>
+    <% if (standing) { %>
+    <div class="position-badge">
+      <div class="position-num"><%= standing.position %></div>
+      <div class="position-label">Position</div>
+    </div>
+    <% } %>
+  </div>
+
+  <% if (standing) { %>
+  <!-- STATS GRID -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-num"><%= standing.points %></div>
+      <div class="stat-label">Points</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num"><%= standing.playedGames %></div>
+      <div class="stat-label">Played</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" style="color:#00ff87"><%= standing.won %></div>
+      <div class="stat-label">Won</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" style="color:var(--gold)"><%= standing.draw %></div>
+      <div class="stat-label">Drawn</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" style="color:#ff4444"><%= standing.lost %></div>
+      <div class="stat-label">Lost</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num"><%= standing.goalsFor %></div>
+      <div class="stat-label">Goals For</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num"><%= standing.goalsAgainst %></div>
+      <div class="stat-label">Goals Against</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" style="color:<%= standing.goalDifference >= 0 ? '#00ff87' : '#ff4444' %>">
+        <%= standing.goalDifference >= 0 ? '+' : '' %><%= standing.goalDifference %>
+      </div>
+      <div class="stat-label">Goal Diff</div>
+    </div>
+  </div>
+
+  <!-- FORM -->
+  <% if (standing.form) { %>
+  <div class="section-card">
+    <div class="section-head">📈 Recent Form</div>
+    <div class="section-body">
+      <div class="form-pills">
+        <% standing.form.split(',').forEach(r => { %>
+          <div class="form-pill form-<%= r %>"><%= r %></div>
+        <% }) %>
+      </div>
+      <div class="form-label">Most recent →</div>
+    </div>
+  </div>
+  <% } %>
+
+  <!-- HOME/AWAY RECORD -->
+  <div class="section-card">
+    <div class="section-head">🏟️ Home & Away Record</div>
+    <div class="section-body">
+      <table class="record-table">
+        <thead>
+          <tr>
+            <th></th>
+            <th>P</th><th>W</th><th>D</th><th>L</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (homeRecord) { %>
+          <tr class="home-row">
+            <td><strong>🏠 Home</strong></td>
+            <td><%= homeRecord.playedGames %></td>
+            <td style="color:#00ff87"><%= homeRecord.won %></td>
+            <td style="color:var(--gold)"><%= homeRecord.draw %></td>
+            <td style="color:#ff4444"><%= homeRecord.lost %></td>
+          </tr>
+          <% } %>
+          <% if (awayRecord) { %>
+          <tr class="away-row">
+            <td><strong>✈️ Away</strong></td>
+            <td><%= awayRecord.playedGames %></td>
+            <td style="color:#00ff87"><%= awayRecord.won %></td>
+            <td style="color:var(--gold)"><%= awayRecord.draw %></td>
+            <td style="color:#ff4444"><%= awayRecord.lost %></td>
+          </tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <% } %>
+
+  <!-- RECENT FIXTURES -->
+  <div class="section-card">
+    <div class="section-head">📅 Recent & Upcoming Fixtures</div>
+    <div class="section-body" id="fixtures-body">
+      <div class="loading-state"><div class="spinner"></div><p class="loading-text">Loading fixtures...</p></div>
+    </div>
+  </div>
+
+  <script>
+    const TEAM_ID = <%-JSON.stringify(team.id || 0)%>;
+    const TEAM_NAME = <%-JSON.stringify(team.name || '')%>;
+    const LEAGUE_CODE = <%-JSON.stringify(leagueCode || '')%>;
+
+    async function loadFixtures() {
+      try {
+        const res = await fetch(`/api/matches/${LEAGUE_CODE}`);
+        if (!res.ok) throw new Error('Failed to load');
+        const data = await res.json();
+
+        const matches = (data.matches || []).filter(m =>
+          m.homeTeam?.id === TEAM_ID || m.awayTeam?.id === TEAM_ID
+        ).slice(-5).concat(
+          (data.matches || []).filter(m =>
+            (m.homeTeam?.id === TEAM_ID || m.awayTeam?.id === TEAM_ID) &&
+            (m.status === 'SCHEDULED' || m.status === 'TIMED')
+          ).slice(0, 3)
+        ).filter((m, i, a) => a.findIndex(x => x.id === m.id) === i)
+         .sort((a, b) => new Date(a.utcDate) - new Date(b.utcDate));
+
+        if (matches.length === 0) {
+          document.getElementById('fixtures-body').innerHTML = '<p style="color:var(--muted);font-size:14px;padding:20px 0">No fixtures found</p>';
+          return;
+        }
+
+        let html = '';
+        matches.forEach(m => {
+          const isHome = m.homeTeam?.id === TEAM_ID;
+          const finished = m.status === 'FINISHED';
+          const live = ['LIVE','IN_PLAY','PAUSED'].includes(m.status);
+
+          const homeScore = m.score?.fullTime?.home;
+          const awayScore = m.score?.fullTime?.away;
+
+          const badgeCls = live ? 'fix-LIVE' : finished ? 'fix-FT' : 'fix-UP';
+          const badgeLabel = live ? 'LIVE' : finished ? 'FT' : new Date(m.utcDate).toLocaleDateString('en-GB', {day:'numeric',month:'short'});
+
+          const homeName = m.homeTeam?.shortName || m.homeTeam?.name || '?';
+          const awayName = m.awayTeam?.shortName || m.awayTeam?.name || '?';
+          const homeCrestUrl = m.homeTeam?.crest ? '/api/crest?url=' + encodeURIComponent(m.homeTeam.crest) : '';
+          const awayCrestUrl = m.awayTeam?.crest ? '/api/crest?url=' + encodeURIComponent(m.awayTeam.crest) : '';
+
+          html += `<div class="fixture-item">
+            <div class="fix-team">
+              ${homeCrestUrl ? `<img class="fix-crest" src="${homeCrestUrl}" onerror="this.style.display='none'">` : '<div style="width:24px;height:24px;"></div>'}
+              <span class="${isHome ? 'fix-team-highlight' : ''}">${homeName}</span>
+            </div>
+            <div class="fix-center">
+              ${finished || live
+                ? `<div class="fix-score">${homeScore ?? 0} — ${awayScore ?? 0}</div>`
+                : `<div class="fix-score" style="font-size:13px;color:var(--muted)">vs</div>`
+              }
+              <span class="fix-badge ${badgeCls}">${badgeLabel}</span>
+            </div>
+            <div class="fix-team" style="justify-content:flex-end;text-align:right;">
+              <span class="${!isHome ? 'fix-team-highlight' : ''}">${awayName}</span>
+              ${awayCrestUrl ? `<img class="fix-crest" src="${awayCrestUrl}" onerror="this.style.display='none'">` : '<div style="width:24px;height:24px;"></div>'}
+            </div>
+          </div>`;
+        });
+
+        document.getElementById('fixtures-body').innerHTML = html;
+      } catch(err) {
+        document.getElementById('fixtures-body').innerHTML = `<p style="color:#ff6464;font-size:14px;padding:20px 0">⚠️ Could not load fixtures — rate limit, try again in 60s</p>`;
+      }
+    }
+
+    loadFixtures();
+  </script>
+<script src="/javascripts/chatbot.js"></script>
+<script src="/javascripts/polish.js"></script>
+</body>
+</html>

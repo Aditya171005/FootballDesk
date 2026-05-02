@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Players</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: url("/images/stadium6.jpg") no-repeat center center fixed;
+            background-size: cover;
+            color: white;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            background: rgba(9, 0, 0, 0.1);
+            backdrop-filter: blur(100px);
+            padding: 20px;
+            border-radius: 15px;
+            width: 60%;
+            margin: auto;
+            box-shadow: 0px 0px 15px rgba(0, 255, 255, 0.6);
+        }
+
+        .player-list {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .player-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px;
+            width: 200px;
+            text-align: center;
+            box-shadow: 0px 0px 10px rgba(0, 255, 255, 0.5);
+        }
+
+        .player-card h3 {
+            color: cyan;
+        }
+
+        .player-card p {
+            color: white;
+        }
+
+        .update-btn {
+            background: linear-gradient(45deg, #00ff99, #0066ff);
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            cursor: pointer;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: 0.3s ease;
+            margin-top: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 255, 255, 0.5);
+        }
+
+        .update-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0px 0px 20px rgba(0, 255, 255, 0.8);
+        }
+
+        .home-btn {
+            display: inline-block;
+            text-decoration: none;
+            background-color: #2465ab;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 18px;
+            margin-top: 20px;
+        }
+
+        .home-btn:hover {
+            background-color: #2e29d3;
+        }
+
+        input {
+            width: 50%;
+            text-align: center;
+            padding: 8px;
+            border-radius: 5px;
+            border: none;
+            font-size: 16px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            outline: none;
+            transition: 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>🏆 Players Section 🏆</h2>
+
+    <div class="container">
+        <input type="text" id="search-player" placeholder="Search Player..." onkeyup="searchPlayer()">
+        <button class="update-btn" onclick="addPlayer()">Add Player</button>
+    </div>
+
+    <div class="player-list" id="playerList"></div>
+
+    <script>
+        let players = [];
+
+       async function  addPlayer() {
+        console.log("inside the functiion ");
+            const url = 'https://api-football-v1.p.rapidapi.com/v3/players?id=276&season=2020';
+const options = {
+	method: 'GET',
+	headers: {
+		'x-rapidapi-key': '0d30ebd190msh83aab47ff3798e3p129843jsn68ed80e40a52',
+		'x-rapidapi-host': 'api-football-v1.p.rapidapi.com'
+	}
+};
+
+try {
+	const response = await fetch(url, options);
+	const result = await response.text();
+	console.log(result);
+} catch (error) {
+	console.error(error);
+}
+            let name = prompt("Enter Player Name:");
+            let position = prompt("Enter Player Position:");
+            let team = prompt("Enter Player Team:");
+
+            if (name && position && team) {
+                players.push({ name, position, team });
+                displayPlayers();
+            }
+        }
+
+        function displayPlayers() {
+            let playerList = document.getElementById("playerList");
+            playerList.innerHTML = "";
+            
+            players.forEach(player => {
+                let playerDiv = document.createElement("div");
+                playerDiv.classList.add("player-card");
+                playerDiv.innerHTML = `
+                    <h3>${player.name}</h3>
+                    <p>Position: ${player.position}</p>
+                    <p>Team: ${player.team}</p>
+                `;
+                playerList.appendChild(playerDiv);
+            });
+        }
+
+        function searchPlayer() {
+            let searchValue = document.getElementById("search-player").value.toLowerCase();
+            let playerCards = document.getElementsByClassName("player-card");
+
+            Array.from(playerCards).forEach(card => {
+                let playerName = card.querySelector("h3").textContent.toLowerCase();
+                card.style.display = playerName.includes(searchValue) ? "block" : "none";
+            });
+        }
+    </script>
+<script src="/javascripts/chatbot.js"></script>
+<script src="/javascripts/polish.js"></script>
+</body>
+</html>

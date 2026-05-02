@@ -1,0 +1,49 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Live Football Matches</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/stylesheets/localTeams.css">
+</head>
+<body>
+    <div class="container py-4">
+        <h1 class="text-center text-light display-5 mb-3">⚽ Live Football Matches</h1>
+        <p class="text-center text-secondary mb-5">Stay updated with real-time scores and match stats</p>
+
+        <% if (liveMatches.length > 0) { %>
+            <% liveMatches.forEach(match => { %>
+                <div class="match-card animate-fade">
+                    <div class="match-header d-flex justify-content-between align-items-center">
+                        <h3><%= match.team1 %></h3>
+                        <span class="vs">vs</span>
+                        <h3><%= match.team2 %></h3>
+                    </div>
+
+                    <hr class="my-2"/>
+
+                    <div class="stats-grid">
+                        <div><strong>Goals:</strong> <%= match.goals1 %> - <%= match.goals2 %></div>
+                        <div><strong>Touchdowns:</strong> <%= match.touchdowns1 %> - <%= match.touchdowns2 %></div>
+                        <div><strong>Safeties:</strong> <%= match.safeties1 %> - <%= match.safeties2 %></div>
+                        <div><strong>Fouls:</strong> <%= match.fouls1 %> - <%= match.fouls2 %></div>
+                        <div class="points"><strong>Total Points:</strong> <%= match.totalPoints1 %> - <%= match.totalPoints2 %></div>
+                        <div><strong>Winner:</strong> <%= match.winner %></div>
+                    </div>
+                </div>
+            <% }) %>
+        <% } else { %>
+            <p class="text-center text-warning">No live matches at the moment.</p>
+        <% } %>
+    </div>
+
+    <div class="footer mt-5">
+        <p>&copy; 2024 <span class="brand">FootyStation</span>. Made with ❤️ for football lovers. <a href="/">Home</a></p>
+    </div>
+  <script src="/javascripts/chatbot.js"></script>
+<script src="/javascripts/polish.js"></script>
+</body>
+</html>
+```

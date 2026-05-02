@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>League Standings — Football Hub</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'DM Sans', sans-serif; background: #080c14; color: white; min-height: 100vh; }
+
+    /* ── NAVBAR ─────────────────────────────────────────────── */
+    header {
+      background: rgba(8,12,20,0.97); backdrop-filter: blur(16px);
+      padding: 0 40px; display: flex; justify-content: space-between; align-items: center;
+      position: fixed; top:0; left:0; right:0; z-index: 200; height: 78px;
+      border-bottom: 1px solid rgba(255,215,0,0.1);
+    }
+    .logo { height: 62px; width: auto; }
+    nav ul { display:flex; gap:4px; list-style:none; padding:0; margin:0; align-items:center; flex-wrap:wrap; }
+    nav a { color:rgba(255,255,255,0.8); text-decoration:none; font-weight:600; font-size:15px; padding:8px 14px; border-radius:8px; transition:all 0.2s; white-space:nowrap; }
+    nav a:hover, nav a.active { color:#FFD700; background:rgba(255,215,0,0.08); }
+    nav a.login-btn { background:#f70404; color:white; border-radius:20px; padding:8px 20px; }
+    nav a.login-btn:hover { background:#ff3333; }
+    .nav-more { position:relative; }
+    .nav-more-btn { color:rgba(255,255,255,0.8); font-weight:600; font-size:15px; padding:8px 14px; border-radius:8px; background:none; border:none; cursor:pointer; font-family:'DM Sans',sans-serif; display:flex; align-items:center; gap:4px; transition:all 0.2s; }
+    .nav-more-btn:hover { color:#FFD700; background:rgba(255,215,0,0.08); }
+    .nav-more-menu { display:none; position:absolute; top:calc(100% + 8px); right:0; background:#0f1623; border:1px solid rgba(255,215,0,0.2); border-radius:14px; overflow:hidden; z-index:999; box-shadow:0 20px 60px rgba(0,0,0,0.7); min-width:200px; }
+    .nav-more.open .nav-more-menu { display:block; }
+    .nav-more-menu a { display:flex; align-items:center; gap:10px; padding:12px 18px; color:rgba(255,255,255,0.8); text-decoration:none; font-size:13px; font-weight:600; transition:all 0.15s; border-bottom:1px solid rgba(255,255,255,0.04); }
+    .nav-more-menu a:last-child { border-bottom:none; }
+    .nav-more-menu a:hover { background:rgba(255,215,0,0.08); color:#FFD700; }
+
+    /* ── PAGE ───────────────────────────────────────────────── */
+    .page { padding: 100px 20px 60px; max-width: 1100px; margin: 0 auto; }
+
+    .page-hero { text-align: center; margin-bottom: 36px; }
+    .page-hero .eyebrow { font-family:'Bebas Neue',sans-serif; font-size:16px; letter-spacing:5px; color:#FFD700; margin-bottom:10px; }
+    .page-hero h1 { font-family:'Bebas Neue',sans-serif; font-size:60px; line-height:1; color:white; }
+    .page-hero h1 span { color:#FFD700; }
+    .page-hero p { color:rgba(255,255,255,0.45); margin-top:8px; font-size:15px; }
+
+    /* STATUS BADGE */
+    .status-wrap { text-align:center; margin-bottom:28px; }
+    .status-badge { display:inline-flex; align-items:center; gap:7px; padding:7px 18px; border-radius:30px; font-size:12px; font-weight:700; letter-spacing:1px; text-transform:uppercase; }
+    .status-badge.loading { background:rgba(26,86,255,0.15); border:1px solid rgba(26,86,255,0.3); color:#4f7cff; }
+    .status-badge.live { background:rgba(0,200,100,0.12); border:1px solid rgba(0,200,100,0.3); color:#00c864; }
+    .status-badge.error { background:rgba(255,60,60,0.1); border:1px solid rgba(255,60,60,0.25); color:#ff6464; }
+    .status-dot { width:7px; height:7px; border-radius:50%; background:currentColor; animation:blink 2s infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+    /* ── LEAGUE TABS ─────────────────────────────────────────── */
+    .league-tabs { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin-bottom:32px; }
+    .league-btn {
+      display:flex; align-items:center; gap:10px;
+      padding:11px 20px; border-radius:12px;
+      background:#0f1623; border:1px solid rgba(255,255,255,0.08);
+      color:rgba(255,255,255,0.65); font-size:14px; font-weight:600;
+      font-family:'DM Sans',sans-serif; cursor:pointer;
+      transition:all 0.2s;
+    }
+    .league-btn:hover { border-color:rgba(255,215,0,0.35); color:#FFD700; background:rgba(255,215,0,0.06); transform:translateY(-2px); }
+    .league-btn.active { background:rgba(255,215,0,0.12); border-color:#FFD700; color:#FFD700; box-shadow:0 4px 20px rgba(255,215,0,0.12); }
+    .league-btn .lb-logo { width:24px; height:24px; object-fit:contain; flex-shrink:0; }
+    .league-btn .lb-flag { font-size:18px; }
+
+    /* ── TABLE CARD ──────────────────────────────────────────── */
+    .table-card {
+      background:#0f1623; border:1px solid rgba(255,215,0,0.1);
+      border-radius:20px; overflow:hidden;
+      box-shadow:0 24px 60px rgba(0,0,0,0.4);
+    }
+    .table-header {
+      display:flex; align-items:center; gap:14px;
+      padding:22px 28px; border-bottom:1px solid rgba(255,255,255,0.06);
+      background:rgba(255,215,0,0.03);
+    }
+    .table-header img { width:38px; height:38px; object-fit:contain; }
+    .table-header h2 { font-family:'Bebas Neue',sans-serif; font-size:26px; letter-spacing:1px; color:white; }
+
+    /* TABLE */
+    .standings-table { width:100%; border-collapse:collapse; }
+    .standings-table thead th {
+      padding:12px 14px; text-align:center;
+      font-size:11px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase;
+      color:rgba(255,255,255,0.35); border-bottom:1px solid rgba(255,255,255,0.07);
+      background:rgba(0,0,0,0.2);
+    }
+    .standings-table thead th.th-team { text-align:left; padding-left:18px; }
+    .standings-table tbody tr {
+      border-bottom:1px solid rgba(255,255,255,0.04);
+      transition:background 0.15s, transform 0.15s;
+      cursor:pointer;
+    }
+    .standings-table tbody tr:hover { background:rgba(255,215,0,0.05); }
+    .standings-table tbody tr:last-child { border-bottom:none; }
+    .standings-table td { padding:13px 14px; text-align:center; font-size:14px; }
+
+    /* Position */
+    .td-pos { font-family:'Bebas Neue',sans-serif; font-size:18px; color:rgba(255,255,255,0.5); width:44px; }
+    .td-pos.top { color:#FFD700; }
+
+    /* Team */
+    .td-team { text-align:left !important; padding-left:18px !important; }
+    .team-inner { display:flex; align-items:center; gap:12px; }
+    .team-crest { width:30px; height:30px; object-fit:contain; flex-shrink:0; transition:transform 0.2s; }
+    .standings-table tbody tr:hover .team-crest { transform:scale(1.15); }
+    .team-name { font-weight:700; font-size:14px; color:white; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:200px; }
+    .team-name a { color:white; text-decoration:none; transition:color 0.2s; }
+    .team-name a:hover { color:#FFD700; }
+
+    /* Stats */
+    .td-pts { font-family:'Bebas Neue',sans-serif; font-size:22px; color:#FFD700; }
+    .td-gd { font-weight:700; font-size:13px; }
+    .gd-pos { color:#00c864; }
+    .gd-neg { color:#ff6464; }
+    .gd-zero { color:rgba(255,255,255,0.3); }
+
+    /* Zone bars */
+    .zone-cl  { border-left:3px solid #3b82f6; }
+    .zone-el  { border-left:3px solid #f97316; }
+    .zone-ecl { border-left:3px solid #22c55e; }
+    .zone-rel { border-left:3px solid #ef4444; }
+
+    /* Form dots */
+    .form-wrap { display:flex; gap:3px; justify-content:center; }
+    .form-dot { width:9px; height:9px; border-radius:50%; }
+    .form-w { background:#00c864; }
+    .form-d { background:rgba(255,255,255,0.25); }
+    .form-l { background:#ff6464; }
+
+    /* LOADING */
+    .loading-box { display:flex; flex-direction:column; align-items:center; padding:60px 20px; gap:16px; }
+    .spinner { width:44px; height:44px; border:3px solid rgba(255,215,0,0.1); border-top-color:#FFD700; border-radius:50%; animation:spin 0.8s linear infinite; }
+    @keyframes spin { to{transform:rotate(360deg)} }
+    .loading-box p { color:rgba(255,255,255,0.4); font-size:14px; }
+
+    /* ERROR */
+    .error-box { text-align:center; padding:48px 20px; }
+    .error-box .ei { font-size:48px; margin-bottom:12px; }
+    .error-box p { color:rgba(255,100,100,0.8); font-size:15px; margin-bottom:20px; }
+    .retry-btn { background:rgba(255,215,0,0.12); border:1px solid rgba(255,215,0,0.3); color:#FFD700; padding:11px 28px; border-radius:10px; font-size:14px; font-weight:700; font-family:'DM Sans',sans-serif; cursor:pointer; transition:all 0.2s; }
+    .retry-btn:hover { background:rgba(255,215,0,0.2); transform:translateY(-2px); }
+
+    /* LEGEND */
+    .legend { display:flex; gap:20px; flex-wrap:wrap; justify-content:center; padding:16px 24px; border-top:1px solid rgba(255,255,255,0.05); }
+    .legend-item { display:flex; align-items:center; gap:7px; font-size:12px; color:rgba(255,255,255,0.4); }
+    .legend-dot { width:10px; height:10px; border-radius:2px; flex-shrink:0; }
+
+    footer { background:#060a10; border-top:1px solid rgba(255,215,0,0.06); text-align:center; padding:24px; font-size:13px; color:rgba(255,255,255,0.25); margin-top:60px; }
+
+    @media(max-width:768px) {
+      header { padding:0 16px; }
+      .page { padding:90px 12px 40px; }
+      .page-hero h1 { font-size:42px; }
+      .league-btn { padding:9px 14px; font-size:13px; }
+      .hide-mob { display:none; }
+      .team-name { max-width:130px; }
+      .standings-table td, .standings-table th { padding:10px 8px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── NAVBAR ──────────────────────────────────────────────── -->
+<header>
+  <img src="/images/logo2.jpg" alt="Logo" class="logo">
+  <nav>
+    <ul>
+      <li><a href="/">Home</a></li>
+      <li><a href="/localTeams">Local Matches</a></li>
+      <li><a href="/footBall">Live Matches</a></li>
+      <li><a href="/standings" class="active">🏆 Standings</a></li>
+      <li><a href="/fixtures">📅 Fixtures</a></li>
+      <li><a href="/scorers">⚽ Scorers</a></li>
+      <li><a href="/champions-league">🏆 UCL</a></li>
+      <li class="nav-more" id="nav-more">
+        <button class="nav-more-btn" onclick="toggleMore()">More ▾</button>
+        <div class="nav-more-menu">
+          <a href="/quiz">🧠 Football Quiz</a>
+          <a href="/compare">⚽ Player Compare</a>
+          <a href="/history">🏆 League History</a>
+          <a href="/today">🌍 Today's Matches</a>
+          <a href="/news">📰 News</a>
+        </div>
+      </li>
+      <li><a href="/about">About</a></li>
+      <li><a href="/loginpage" class="login-btn">Login</a></li>
+    </ul>
+  </nav>
+</header>
+
+<!-- ── PAGE ────────────────────────────────────────────────── -->
+<div class="page">
+
+  <div class="page-hero">
+    <div class="eyebrow">📊 2025/26 Season</div>
+    <h1>League <span>Standings</span></h1>
+    <p>Live data from all top European leagues</p>
+  </div>
+
+  <div class="status-wrap">
+    <div class="status-badge loading" id="statusBadge">
+      <div class="status-dot"></div>
+      <span id="statusText">Loading...</span>
+    </div>
+  </div>
+
+  <!-- LEAGUE TABS -->
+  <div class="league-tabs">
+    <button class="league-btn active" data-league="PL">
+      <img class="lb-logo" src="/api/crest?url=https://crests.football-data.org/PL.png" onerror="this.style.display='none';this.nextElementSibling.style.display='inline'">
+      <span class="lb-flag" style="display:none">🏴󠁧󠁢󠁥󠁮󠁧󠁿</span>
+      Premier League
+    </button>
+    <button class="league-btn" data-league="PD">
+      <img class="lb-logo" src="/api/crest?url=https://crests.football-data.org/PD.png" onerror="this.style.display='none';this.nextElementSibling.style.display='inline'">
+      <span class="lb-flag" style="display:none">🇪🇸</span>
+      La Liga
+    </button>
+    <button class="league-btn" data-league="BL1">
+      <img class="lb-logo" src="/api/crest?url=https://crests.football-data.org/BL1.png" onerror="this.style.display='none';this.nextElementSibling.style.display='inline'">
+      <span class="lb-flag" style="display:none">🇩🇪</span>
+      Bundesliga
+    </button>
+    <button class="league-btn" data-league="SA">
+      <img class="lb-logo" src="/api/crest?url=https://crests.football-data.org/SA.png" onerror="this.style.display='none';this.nextElementSibling.style.display='inline'">
+      <span class="lb-flag" style="display:none">🇮🇹</span>
+      Serie A
+    </button>
+    <button class="league-btn" data-league="FL1">
+      <img class="lb-logo" src="/api/crest?url=https://crests.football-data.org/FL1.png" onerror="this.style.display='none';this.nextElementSibling.style.display='inline'">
+      <span class="lb-flag" style="display:none">🇫🇷</span>
+      Ligue 1
+    </button>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-card">
+    <div class="table-header">
+      <img id="titleLogo" src="" alt="" style="display:none">
+      <h2 id="titleText">Premier League</h2>
+    </div>
+    <div id="standingsBody"></div>
+  </div>
+
+</div>
+
+<footer><p>&copy; 2026 Football Hub. All rights reserved.</p></footer>
+<script src="/javascripts/chatbot.js"></script>
+<script src="/javascripts/polish.js"></script>
+
+<script>
+  const leagueMeta = {
+    PL:  { name:'Premier League', emblem:'https://crests.football-data.org/PL.png',  cl:4, el:5, ecl:6, rel:18 },
+    PD:  { name:'La Liga',        emblem:'https://crests.football-data.org/PD.png',  cl:4, el:5, ecl:6, rel:18 },
+    BL1: { name:'Bundesliga',     emblem:'https://crests.football-data.org/BL1.png', cl:4, el:5, ecl:6, rel:16 },
+    SA:  { name:'Serie A',        emblem:'https://crests.football-data.org/SA.png',  cl:4, el:5, ecl:6, rel:18 },
+    FL1: { name:'Ligue 1',        emblem:'https://crests.football-data.org/FL1.png', cl:3, el:4, ecl:5, rel:16 },
+  };
+
+  let currentLeague = 'PL';
+
+  function setStatus(type, text) {
+    const badge = document.getElementById('statusBadge');
+    badge.className = 'status-badge ' + type;
+    document.getElementById('statusText').textContent = text;
+  }
+
+  function updateHeader(code) {
+    const meta = leagueMeta[code];
+    const logo = document.getElementById('titleLogo');
+    document.getElementById('titleText').textContent = meta.name;
+    logo.src = `/api/crest?url=${encodeURIComponent(meta.emblem)}`;
+    logo.style.display = 'inline-block';
+    logo.onerror = () => logo.style.display = 'none';
+  }
+
+  async function fetchStandings(code) {
+    currentLeague = code;
+    const meta = leagueMeta[code];
+    const body = document.getElementById('standingsBody');
+    updateHeader(code);
+    setStatus('loading', 'Loading...');
+    body.innerHTML = `<div class="loading-box"><div class="spinner"></div><p>Fetching ${meta.name} standings…</p></div>`;
+
+    try {
+      const res = await fetch(`/api/standings/${code}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      if (data.competition?.emblem) {
+        leagueMeta[code].emblem = data.competition.emblem;
+        updateHeader(code);
+      }
+      const table = data?.standings?.find(s => s.type === 'TOTAL')?.table;
+      if (!table?.length) throw new Error('No data');
+      renderTable(table, meta);
+      setStatus('live', '🟢 Live Data');
+    } catch(err) {
+      setStatus('error', '⚠ Error — ' + err.message);
+      body.innerHTML = `
+        <div class="error-box">
+          <div class="ei">⚠️</div>
+          <p>${err.message}</p>
+          <button class="retry-btn" onclick="fetchStandings('${code}')">🔄 Retry</button>
+        </div>`;
+    }
+  }
+
+  function renderTable(entries, meta) {
+    const body = document.getElementById('standingsBody');
+    let rows = '';
+
+    entries.forEach(e => {
+      const pos = e.position;
+      const name = e.team?.name || 'Unknown';
+      const teamId = e.team?.id || '';
+      const crest = e.team?.crest ? `/api/crest?url=${encodeURIComponent(e.team.crest)}` : '';
+      const mp = e.playedGames ?? 0;
+      const w = e.won ?? 0;
+      const d = e.draw ?? 0;
+      const l = e.lost ?? 0;
+      const gf = e.goalsFor ?? 0;
+      const ga = e.goalsAgainst ?? 0;
+      const gd = e.goalDifference ?? 0;
+      const pts = e.points ?? 0;
+      const form = (e.form || '').split(',').filter(Boolean).slice(-5);
+
+      // Zone
+      let zone = '';
+      if (pos <= meta.cl) zone = 'zone-cl';
+      else if (pos <= meta.el) zone = 'zone-el';
+      else if (pos <= meta.ecl) zone = 'zone-ecl';
+      else if (pos >= meta.rel) zone = 'zone-rel';
+
+      // GD
+      const gdClass = gd > 0 ? 'gd-pos' : gd < 0 ? 'gd-neg' : 'gd-zero';
+      const gdText = gd > 0 ? `+${gd}` : gd;
+
+      // Crest
+      const crestHtml = crest
+        ? `<img src="${crest}" class="team-crest" alt="" onerror="this.style.opacity='0'">`
+        : `<div style="width:30px;height:30px;border-radius:6px;background:rgba(255,215,0,0.08);flex-shrink:0"></div>`;
+
+      // Form dots
+      const formHtml = form.map(r => `<div class="form-dot form-${r.toLowerCase()}"></div>`).join('');
+
+      rows += `
+        <tr class="${zone}" onclick="window.location='/team/${teamId}'" style="cursor:pointer">
+          <td class="td-pos ${pos <= 4 ? 'top' : ''}">${pos}</td>
+          <td class="td-team">
+            <div class="team-inner">
+              ${crestHtml}
+              <span class="team-name"><a href="/team/${teamId}" onclick="event.stopPropagation()">${name}</a></span>
+            </div>
+          </td>
+          <td>${mp}</td>
+          <td><strong>${w}</strong></td>
+          <td>${d}</td>
+          <td>${l}</td>
+          <td class="hide-mob">${gf}</td>
+          <td class="hide-mob">${ga}</td>
+          <td class="td-gd ${gdClass}">${gdText}</td>
+          <td class="hide-mob"><div class="form-wrap">${formHtml}</div></td>
+          <td class="td-pts">${pts}</td>
+        </tr>`;
+    });
+
+    body.innerHTML = `
+      <table class="standings-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th class="th-team">Team</th>
+            <th>MP</th>
+            <th>W</th>
+            <th>D</th>
+            <th>L</th>
+            <th class="hide-mob">GF</th>
+            <th class="hide-mob">GA</th>
+            <th>GD</th>
+            <th class="hide-mob">Form</th>
+            <th>Pts</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#3b82f6"></div>Champions League</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#f97316"></div>Europa League</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#22c55e"></div>Conference League</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#ef4444"></div>Relegation</div>
+      </div>`;
+  }
+
+  // Tab clicks
+  document.querySelectorAll('.league-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.league-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      fetchStandings(btn.dataset.league);
+    });
+  });
+
+  // More dropdown
+  function toggleMore() { document.getElementById('nav-more').classList.toggle('open'); }
+  document.addEventListener('click', e => {
+    if (!e.target.closest('#nav-more')) document.getElementById('nav-more').classList.remove('open');
+  });
+
+  fetchStandings('PL');
+</script>
+</body>
+</html>

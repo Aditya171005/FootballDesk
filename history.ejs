@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>League History | Football Hub</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'DM Sans', sans-serif; background: #0a0e17; color: white; min-height: 100vh; }
+
+    header { background: rgba(8,12,20,0.95); backdrop-filter: blur(12px); padding: 0 40px; display: flex; justify-content: space-between; align-items: center; position: fixed; top:0; left:0; right:0; z-index: 200; height: 70px; border-bottom: 1px solid rgba(255,215,0,0.1); }
+    .logo { height: 50px; width: auto; }
+    nav ul { display:flex; gap:4px; list-style:none; padding:0; margin:0; align-items:center; }
+    nav a { color:rgba(255,255,255,0.7); text-decoration:none; font-weight:600; font-size:13px; padding:7px 13px; border-radius:8px; transition:all 0.2s; }
+    nav a:hover { color:#FFD700; background:rgba(255,215,0,0.08); }
+    nav a.login-btn { background:#f70404; color:white; border-radius:20px; padding:7px 18px; }
+    .nav-more { position:relative; }
+    .nav-more-btn { color:rgba(255,255,255,0.7); background:none; border:none; font-weight:600; font-size:13px; padding:7px 13px; border-radius:8px; cursor:pointer; font-family:'DM Sans',sans-serif; transition:all 0.2s; display:flex; align-items:center; gap:4px; }
+    .nav-more-btn:hover { color:#FFD700; background:rgba(255,215,0,0.08); }
+    .nav-more-btn .arrow { font-size:10px; transition:transform 0.2s; }
+    .nav-more.open .nav-more-btn .arrow { transform:rotate(180deg); }
+    .more-dropdown { display:none; position:absolute; top:calc(100% + 8px); right:0; background:#0f1623; border:1px solid rgba(255,215,0,0.2); border-radius:14px; overflow:hidden; z-index:999; box-shadow:0 20px 60px rgba(0,0,0,0.7); min-width:200px; }
+    .nav-more.open .more-dropdown { display:block; }
+    .more-dropdown a { display:flex; align-items:center; gap:10px; padding:11px 16px; color:rgba(255,255,255,0.8); text-decoration:none; font-size:13px; font-weight:600; transition:all 0.15s; border-bottom:1px solid rgba(255,255,255,0.04); }
+    .more-dropdown a:last-child { border-bottom:none; }
+    .more-dropdown a:hover { background:rgba(255,215,0,0.07); color:#FFD700; }
+
+    .page { padding: 100px 20px 60px; max-width: 1000px; margin: 0 auto; }
+    .page-header { text-align:center; margin-bottom:40px; }
+    .page-header h1 { font-family:'Bebas Neue',sans-serif; font-size:56px; letter-spacing:3px; }
+    .page-header h1 span { color:#FFD700; }
+    .page-header p { color:rgba(255,255,255,0.5); margin-top:8px; font-size:16px; }
+
+    /* LEAGUE TABS */
+    .league-tabs { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:32px; justify-content:center; }
+    .league-tab {
+      padding:10px 20px; border-radius:30px; border:2px solid rgba(255,255,255,0.1);
+      background:transparent; color:rgba(255,255,255,0.6); font-size:13px; font-weight:700;
+      cursor:pointer; transition:all 0.2s; font-family:'DM Sans',sans-serif;
+    }
+    .league-tab:hover { border-color:rgba(255,215,0,0.3); color:#FFD700; }
+    .league-tab.active { background:#FFD700; color:#000; border-color:#FFD700; }
+
+    /* STATS ROW */
+    .stats-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px; margin-bottom:32px; }
+    .stat-card { background:#0f1623; border-radius:14px; border:1px solid rgba(255,255,255,0.07); padding:20px; text-align:center; }
+    .stat-card .val { font-family:'Bebas Neue',sans-serif; font-size:36px; color:#FFD700; }
+    .stat-card .lbl { font-size:11px; color:rgba(255,255,255,0.4); text-transform:uppercase; letter-spacing:1px; margin-top:4px; }
+
+    /* TIMELINE */
+    .timeline { position:relative; }
+    .timeline::before { content:''; position:absolute; left:50%; top:0; bottom:0; width:2px; background:rgba(255,215,0,0.1); transform:translateX(-50%); }
+    .timeline-item { display:grid; grid-template-columns:1fr 60px 1fr; gap:0; margin-bottom:16px; align-items:center; }
+    .timeline-item:nth-child(odd) .tl-content { grid-column:1; text-align:right; padding-right:24px; }
+    .timeline-item:nth-child(odd) .tl-empty { grid-column:3; }
+    .timeline-item:nth-child(even) .tl-content { grid-column:3; text-align:left; padding-left:24px; }
+    .timeline-item:nth-child(even) .tl-empty { grid-column:1; }
+
+    .tl-dot { grid-column:2; width:48px; height:48px; border-radius:50%; background:#0f1623; border:2px solid rgba(255,215,0,0.3); display:flex; align-items:center; justify-content:center; font-family:'Bebas Neue',sans-serif; font-size:13px; color:#FFD700; z-index:1; margin:0 auto; transition:all 0.2s; cursor:pointer; }
+    .tl-dot:hover { border-color:#FFD700; background:rgba(255,215,0,0.1); }
+    .tl-dot.champion-year { border-color:#FFD700; background:rgba(255,215,0,0.08); }
+
+    .tl-content { }
+    .tl-card {
+      background:#0f1623; border-radius:12px; border:1px solid rgba(255,255,255,0.07);
+      padding:14px 16px; transition:all 0.2s; cursor:pointer;
+    }
+    .tl-card:hover { border-color:rgba(255,215,0,0.25); background:rgba(255,215,0,0.04); }
+    .tl-year { font-family:'Bebas Neue',sans-serif; font-size:13px; color:rgba(255,215,0,0.7); letter-spacing:1px; }
+    .tl-team { font-weight:700; font-size:15px; color:white; margin:2px 0; }
+    .tl-detail { font-size:12px; color:rgba(255,255,255,0.4); }
+    .tl-trophy { font-size:16px; }
+
+    /* MOST TITLES */
+    .most-titles { background:#0f1623; border-radius:16px; border:1px solid rgba(255,215,0,0.12); padding:28px; margin-bottom:32px; }
+    .most-titles h3 { font-family:'Bebas Neue',sans-serif; font-size:22px; color:white; margin-bottom:16px; }
+    .title-bar-item { display:flex; align-items:center; gap:12px; margin-bottom:12px; }
+    .title-bar-name { font-weight:700; font-size:14px; min-width:140px; }
+    .title-bar-bg { flex:1; height:10px; background:rgba(255,255,255,0.06); border-radius:5px; overflow:hidden; }
+    .title-bar-fill { height:100%; border-radius:5px; background:linear-gradient(90deg,#FFD700,#FFA500); }
+    .title-bar-count { font-family:'Bebas Neue',sans-serif; font-size:18px; color:#FFD700; min-width:28px; text-align:right; }
+
+    footer { background:#080c14; border-top:1px solid rgba(255,215,0,0.08); text-align:center; padding:24px; font-size:13px; color:rgba(255,255,255,0.3); margin-top:60px; }
+
+    @media(max-width:640px) {
+      .timeline::before { left:24px; }
+      .timeline-item { grid-template-columns:48px 1fr; }
+      .timeline-item:nth-child(odd) .tl-content,
+      .timeline-item:nth-child(even) .tl-content { grid-column:2; text-align:left; padding-left:16px; padding-right:0; }
+      .timeline-item:nth-child(odd) .tl-empty,
+      .timeline-item:nth-child(even) .tl-empty { display:none; }
+      .tl-dot { grid-column:1; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <img src="/images/logo2.jpg" alt="Logo" class="logo">
+    <nav>
+      <ul>
+        <li><a href="/">Home</a></li>
+        <li><a href="/standings">🏆 Standings</a></li>
+        <li><a href="/fixtures">📅 Fixtures</a></li>
+        <li><a href="/scorers">⚽ Scorers</a></li>
+        <li class="nav-more" id="nav-more">
+          <button class="nav-more-btn" onclick="toggleMore()">More <span class="arrow">▾</span></button>
+          <div class="more-dropdown">
+            <a href="/quiz">🧠 Football Quiz</a>
+            <a href="/compare">⚖️ Player Compare</a>
+            <a href="/history" style="color:#FFD700;">🏅 League History</a>
+            <a href="/today">📅 Today's Matches</a>
+            <a href="/news">📰 News</a>
+          </div>
+        </li>
+        <li><a href="/loginpage" class="login-btn">Login</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <div class="page">
+    <div class="page-header">
+      <h1>League <span>History</span></h1>
+      <p>Champions, records and fun facts — last 30 years</p>
+    </div>
+
+    <div class="league-tabs">
+      <button class="league-tab active" onclick="showLeague('PL')">🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League</button>
+      <button class="league-tab" onclick="showLeague('PD')">🇪🇸 La Liga</button>
+      <button class="league-tab" onclick="showLeague('BL1')">🇩🇪 Bundesliga</button>
+      <button class="league-tab" onclick="showLeague('SA')">🇮🇹 Serie A</button>
+      <button class="league-tab" onclick="showLeague('FL1')">🇫🇷 Ligue 1</button>
+    </div>
+
+    <div class="stats-row" id="stats-row"></div>
+    <div class="most-titles" id="most-titles"></div>
+    <div class="timeline" id="timeline"></div>
+  </div>
+
+  <footer><p>&copy; 2026 Football World. All rights reserved.</p></footer>
+
+  <script>
+    function toggleMore() { document.getElementById('nav-more').classList.toggle('open'); }
+    document.addEventListener('click', (e) => { if (!e.target.closest('#nav-more')) document.getElementById('nav-more').classList.remove('open'); });
+
+    const HISTORY = {
+      PL: {
+        name: 'Premier League', founded: 1992,
+        champions: [
+          { year: 2025, team: 'Liverpool', pts: 87, note: '2nd title in 5 years' },
+          { year: 2024, team: 'Manchester City', pts: 91, note: '6th title in 7 seasons' },
+          { year: 2023, team: 'Manchester City', pts: 89, note: '5th title under Guardiola' },
+          { year: 2022, team: 'Manchester City', pts: 93, note: 'Dramatic final day win' },
+          { year: 2021, team: 'Manchester City', pts: 86, note: '5th PL title' },
+          { year: 2020, team: 'Liverpool', pts: 99, note: 'Record-breaking, 30-year wait' },
+          { year: 2019, team: 'Manchester City', pts: 98, note: 'Back-to-back titles' },
+          { year: 2018, team: 'Manchester City', pts: 100, note: 'Record 100 points' },
+          { year: 2017, team: 'Chelsea', pts: 93, note: 'Conte\'s debut season' },
+          { year: 2016, team: 'Leicester City', pts: 81, note: 'Greatest sporting miracle' },
+          { year: 2015, team: 'Chelsea', pts: 87, note: '5000-1 underdogs won it next year' },
+          { year: 2014, team: 'Manchester City', pts: 86, note: 'Aguero magic' },
+          { year: 2013, team: 'Manchester United', pts: 89, note: 'Ferguson\'s final title' },
+          { year: 2012, team: 'Manchester City', pts: 89, note: 'Aguero 93:20!' },
+          { year: 2011, team: 'Manchester United', pts: 80, note: '19th league title' },
+          { year: 2010, team: 'Chelsea', pts: 86, note: 'Ancelotti\'s double' },
+          { year: 2009, team: 'Manchester United', pts: 90, note: 'Ronaldo\'s last season' },
+          { year: 2008, team: 'Manchester United', pts: 87, note: 'Ronaldo 31 goals' },
+          { year: 2007, team: 'Manchester United', pts: 89, note: 'Ferguson\'s 9th PL' },
+          { year: 2006, team: 'Chelsea', pts: 91, note: 'Mourinho era' },
+          { year: 2005, team: 'Chelsea', pts: 95, note: 'Record 95 points' },
+          { year: 2004, team: 'Arsenal', pts: 90, note: 'The Invincibles — 49 unbeaten' },
+          { year: 2003, team: 'Manchester United', pts: 83, note: '8th title in 11 years' },
+          { year: 2002, team: 'Arsenal', pts: 87, note: 'Wenger\'s double' },
+          { year: 2001, team: 'Manchester United', pts: 80, note: 'Treble champions' },
+          { year: 2000, team: 'Manchester United', pts: 91, note: '6th PL title' },
+          { year: 1999, team: 'Manchester United', pts: 79, note: 'Treble season' },
+          { year: 1998, team: 'Arsenal', pts: 78, note: 'Wenger double' },
+          { year: 1997, team: 'Manchester United', pts: 75, note: '4th PL title' },
+          { year: 1996, team: 'Manchester United', pts: 82, note: 'Cantona era' },
+        ]
+      },
+      PD: {
+        name: 'La Liga', founded: 1929,
+        champions: [
+          { year: 2025, team: 'Barcelona', pts: 85, note: 'Flick\'s revolution' },
+          { year: 2024, team: 'Real Madrid', pts: 95, note: 'Champions League & Liga double' },
+          { year: 2023, team: 'Barcelona', pts: 88, note: 'Xavi\'s first title' },
+          { year: 2022, team: 'Real Madrid', pts: 86, note: 'Ancelotti\'s 2nd La Liga' },
+          { year: 2021, team: 'Atletico Madrid', pts: 86, note: 'Simeone\'s miracle' },
+          { year: 2020, team: 'Real Madrid', pts: 87, note: 'Post-COVID season' },
+          { year: 2019, team: 'Barcelona', pts: 87, note: 'Messi\'s 6th Pichichi' },
+          { year: 2018, team: 'Barcelona', pts: 93, note: 'Unbeaten Liga season' },
+          { year: 2017, team: 'Real Madrid', pts: 93, note: 'First back-to-back La Liga & UCL' },
+          { year: 2016, team: 'Barcelona', pts: 91, note: 'MSN: 131 goals' },
+          { year: 2015, team: 'Barcelona', pts: 94, note: 'MSN era begins, treble' },
+          { year: 2014, team: 'Atletico Madrid', pts: 90, note: 'Simeone\'s first La Liga' },
+          { year: 2013, team: 'Barcelona', pts: 100, note: 'Messi 50 goals season' },
+          { year: 2012, team: 'Real Madrid', pts: 100, note: 'Mourinho\'s only Liga' },
+          { year: 2011, team: 'Barcelona', pts: 96, note: 'All-time record points' },
+          { year: 2010, team: 'Barcelona', pts: 99, note: 'Pep Guardiola treble' },
+          { year: 2009, team: 'Barcelona', pts: 87, note: 'Guardiola\'s debut' },
+          { year: 2008, team: 'Real Madrid', pts: 85, note: 'Schuster\'s La Liga' },
+          { year: 2007, team: 'Real Madrid', pts: 76, note: 'Ruud van Nistelrooy top scorer' },
+          { year: 2006, team: 'Barcelona', pts: 82, note: 'Ronaldinho era' },
+          { year: 2005, team: 'Barcelona', pts: 84, note: 'Rijkaard\'s first title' },
+          { year: 2004, team: 'Valencia', pts: 77, note: 'Double for Valencia' },
+          { year: 2003, team: 'Real Madrid', pts: 78, note: 'Galácticos era' },
+          { year: 2002, team: 'Valencia', pts: 75, note: 'Benítez\'s Valencia' },
+          { year: 2001, team: 'Real Madrid', pts: 80, note: 'Del Bosque double' },
+          { year: 2000, team: 'Deportivo', pts: 69, note: 'Surprise champions' },
+          { year: 1999, team: 'Barcelona', pts: 79, note: 'Van Gaal era' },
+          { year: 1998, team: 'Barcelona', pts: 74, note: 'Ronaldo\'s last season' },
+          { year: 1997, team: 'Real Madrid', pts: 92, note: 'Fabio Capello title' },
+          { year: 1996, team: 'Atletico Madrid', pts: 73, note: 'Radomir Antić' },
+        ]
+      },
+      BL1: {
+        name: 'Bundesliga', founded: 1963,
+        champions: [
+          { year: 2025, team: 'Bayer Leverkusen', pts: 83, note: 'Defending champions' },
+          { year: 2024, team: 'Bayer Leverkusen', pts: 90, note: 'Unbeaten champions, Xabi Alonso' },
+          { year: 2023, team: 'Borussia Dortmund', pts: 78, note: 'First title since 2012' },
+          { year: 2022, team: 'Bayern Munich', pts: 77, note: '10th consecutive title' },
+          { year: 2021, team: 'Bayern Munich', pts: 78, note: '9th in a row' },
+          { year: 2020, team: 'Bayern Munich', pts: 82, note: 'Treble under Flick' },
+          { year: 2019, team: 'Bayern Munich', pts: 78, note: '7th in a row' },
+          { year: 2018, team: 'Bayern Munich', pts: 84, note: '6th consecutive' },
+          { year: 2017, team: 'Bayern Munich', pts: 82, note: 'Ancelotti\'s title' },
+          { year: 2016, team: 'Bayern Munich', pts: 88, note: 'Guardiola\'s last Bayern title' },
+          { year: 2015, team: 'Bayern Munich', pts: 79, note: 'Guardiola era' },
+          { year: 2014, team: 'Bayern Munich', pts: 90, note: 'Record 7 games ahead' },
+          { year: 2013, team: 'Bayern Munich', pts: 91, note: 'Historic treble' },
+          { year: 2012, team: 'Borussia Dortmund', pts: 81, note: 'Back-to-back for BVB' },
+          { year: 2011, team: 'Borussia Dortmund', pts: 75, note: 'Klopp\'s triumph' },
+          { year: 2010, team: 'Bayern Munich', pts: 70, note: 'Louis van Gaal' },
+          { year: 2009, team: 'Wolfsburg', pts: 69, note: 'Dzeko & Grafite 54 goals' },
+          { year: 2008, team: 'Bayern Munich', pts: 76, note: 'Ottmar Hitzfeld return' },
+          { year: 2007, team: 'Stuttgart', pts: 70, note: 'Surprise champions' },
+          { year: 2006, team: 'Bayern Munich', pts: 79, note: 'Record 19th title' },
+          { year: 2005, team: 'Bayern Munich', pts: 75, note: '16th title' },
+          { year: 2004, team: 'Werder Bremen', pts: 74, note: 'Klinsmann era' },
+          { year: 2003, team: 'Bayern Munich', pts: 75, note: 'Hitzfeld 2nd spell' },
+          { year: 2002, team: 'Borussia Dortmund', pts: 70, note: 'Sammer era' },
+          { year: 2001, team: 'Bayern Munich', pts: 63, note: 'Champions League too' },
+          { year: 2000, team: 'Bayern Munich', pts: 73, note: 'Hitzfeld treble' },
+          { year: 1999, team: 'Bayern Munich', pts: 78, note: 'Dominant season' },
+          { year: 1998, team: 'Kaiserslautern', pts: 68, note: 'Newly promoted champions!' },
+          { year: 1997, team: 'Bayern Munich', pts: 70, note: '12th Bundesliga' },
+          { year: 1996, team: 'Borussia Dortmund', pts: 68, note: 'Sammer Ballon d\'Or season' },
+        ]
+      },
+      SA: {
+        name: 'Serie A', founded: 1898,
+        champions: [
+          { year: 2025, team: 'Napoli', pts: 82, note: 'Conte\'s immediate impact' },
+          { year: 2024, team: 'Inter Milan', pts: 94, note: 'Inzaghi\'s back-to-back' },
+          { year: 2023, team: 'Napoli', pts: 90, note: 'First scudetto in 33 years' },
+          { year: 2022, team: 'AC Milan', pts: 86, note: 'First title since 2011' },
+          { year: 2021, team: 'Inter Milan', pts: 91, note: 'First title in 11 years' },
+          { year: 2020, team: 'Juventus', pts: 83, note: '9th consecutive scudetto' },
+          { year: 2019, team: 'Juventus', pts: 90, note: '8th in a row' },
+          { year: 2018, team: 'Juventus', pts: 95, note: '7th consecutive' },
+          { year: 2017, team: 'Juventus', pts: 91, note: '6th in a row' },
+          { year: 2016, team: 'Juventus', pts: 91, note: '5th consecutive scudetto' },
+          { year: 2015, team: 'Juventus', pts: 87, note: '4th consecutive' },
+          { year: 2014, team: 'Juventus', pts: 102, note: 'Record 102 points' },
+          { year: 2013, team: 'Juventus', pts: 84, note: '2nd consecutive after exile' },
+          { year: 2012, team: 'Juventus', pts: 84, note: 'First title since 2003' },
+          { year: 2011, team: 'AC Milan', pts: 82, note: 'Ibrahimovic inspiration' },
+          { year: 2010, team: 'Inter Milan', pts: 82, note: 'Mourinho\'s treble' },
+          { year: 2009, team: 'Inter Milan', pts: 84, note: 'Mourinho era' },
+          { year: 2008, team: 'Inter Milan', pts: 85, note: '3rd straight for Inter' },
+          { year: 2007, team: 'Inter Milan', pts: 97, note: 'Awarded after Juventus' },
+          { year: 2006, team: 'Inter Milan', pts: 76, note: 'Post-Calciopoli' },
+          { year: 2005, team: 'Juventus', pts: 86, note: 'Title stripped in Calciopoli' },
+          { year: 2004, team: 'AC Milan', pts: 79, note: 'Shevchenko\'s last great season' },
+          { year: 2003, team: 'Juventus', pts: 72, note: '27th title' },
+          { year: 2002, team: 'Juventus', pts: 71, note: 'Del Piero & Trezeguet' },
+          { year: 2001, team: 'Roma', pts: 75, note: 'Totti\'s greatest season' },
+          { year: 2000, team: 'Lazio', pts: 72, note: 'Eriksson\'s double' },
+          { year: 1999, team: 'AC Milan', pts: 70, note: 'Bierhoff era' },
+          { year: 1998, team: 'Juventus', pts: 74, note: 'Del Piero golden era' },
+          { year: 1997, team: 'Juventus', pts: 65, note: 'Back-to-back' },
+          { year: 1996, team: 'AC Milan', pts: 73, note: 'Capello\'s AC Milan' },
+        ]
+      },
+      FL1: {
+        name: 'Ligue 1', founded: 1932,
+        champions: [
+          { year: 2025, team: 'Paris Saint-Germain', pts: 84, note: 'Post-Mbappé adaptation' },
+          { year: 2024, team: 'Paris Saint-Germain', pts: 83, note: 'Mbappé\'s farewell title' },
+          { year: 2023, team: 'Paris Saint-Germain', pts: 85, note: '11th Ligue 1 title' },
+          { year: 2022, team: 'Paris Saint-Germain', pts: 86, note: 'Messi\'s title' },
+          { year: 2021, team: 'Lille', pts: 82, note: 'Shock title, Mbappé era PSG beaten' },
+          { year: 2020, team: 'Paris Saint-Germain', pts: 68, note: 'COVID season — decided early' },
+          { year: 2019, team: 'Paris Saint-Germain', pts: 91, note: 'Neymar & Mbappé era' },
+          { year: 2018, team: 'Paris Saint-Germain', pts: 93, note: 'Record 93 points' },
+          { year: 2017, team: 'Monaco', pts: 95, note: 'Mbappe & Lemar — UCL semis' },
+          { year: 2016, team: 'Paris Saint-Germain', pts: 96, note: 'Ibrahimovic farewell' },
+          { year: 2015, team: 'Paris Saint-Germain', pts: 83, note: '4th consecutive' },
+          { year: 2014, team: 'Paris Saint-Germain', pts: 89, note: '3rd consecutive' },
+          { year: 2013, team: 'Paris Saint-Germain', pts: 84, note: 'QSI era second title' },
+          { year: 2012, team: 'Montpellier', pts: 82, note: 'Shocking underdogs' },
+          { year: 2011, team: 'Lille', pts: 76, note: 'Cabaye & Gervinho' },
+          { year: 2010, team: 'Marseille', pts: 81, note: 'First title since 1992' },
+          { year: 2009, team: 'Bordeaux', pts: 75, note: 'Chamakh & Gourcuff' },
+          { year: 2008, team: 'Lyon', pts: 79, note: '7th consecutive title' },
+          { year: 2007, team: 'Lyon', pts: 81, note: '6th in a row' },
+          { year: 2006, team: 'Lyon', pts: 79, note: '5th consecutive' },
+          { year: 2005, team: 'Lyon', pts: 79, note: '4th straight title' },
+          { year: 2004, team: 'Lyon', pts: 79, note: 'Hat-trick of titles' },
+          { year: 2003, team: 'Lyon', pts: 68, note: 'Dynasty begins' },
+          { year: 2002, team: 'Lyon', pts: 66, note: 'First ever title for Lyon' },
+          { year: 2001, team: 'Nantes', pts: 65, note: 'Last non-big club winner' },
+          { year: 2000, team: 'Monaco', pts: 65, note: 'Henry\'s final French season' },
+          { year: 1999, team: 'Lens', pts: 64, note: 'Surprise champions' },
+          { year: 1998, team: 'Lens', pts: 68, note: 'Deschamps won WC that year' },
+          { year: 1997, team: 'Monaco', pts: 70, note: 'Wenger years over' },
+          { year: 1996, team: 'Auxerre', pts: 60, note: 'Guy Roux legend' },
+        ]
+      }
+    };
+
+    let currentLeague = 'PL';
+
+    function showLeague(code) {
+      currentLeague = code;
+      document.querySelectorAll('.league-tab').forEach(t => t.classList.remove('active'));
+      event.target.classList.add('active');
+      render();
+    }
+
+    function render() {
+      const data = HISTORY[currentLeague];
+      const champs = data.champions;
+
+      // Count titles
+      const titleCount = {};
+      champs.forEach(c => { titleCount[c.team] = (titleCount[c.team] || 0) + 1; });
+      const sorted = Object.entries(titleCount).sort((a,b) => b[1]-a[1]);
+      const maxTitles = sorted[0][1];
+
+      // Stats row
+      document.getElementById('stats-row').innerHTML = `
+        <div class="stat-card"><div class="val">${champs.length}</div><div class="lbl">Seasons Tracked</div></div>
+        <div class="stat-card"><div class="val">${sorted.length}</div><div class="lbl">Different Champions</div></div>
+        <div class="stat-card"><div class="val">${maxTitles}</div><div class="lbl">Most Titles (${sorted[0][0]})</div></div>
+        <div class="stat-card"><div class="val">${data.founded}</div><div class="lbl">League Founded</div></div>
+      `;
+
+      // Most titles
+      document.getElementById('most-titles').innerHTML = `
+        <h3>🏆 Most Titles</h3>
+        ${sorted.slice(0,8).map(([team, count]) => `
+          <div class="title-bar-item">
+            <span class="title-bar-name">${team}</span>
+            <div class="title-bar-bg"><div class="title-bar-fill" style="width:${(count/maxTitles)*100}%"></div></div>
+            <span class="title-bar-count">${count}</span>
+          </div>
+        `).join('')}
+      `;
+
+      // Timeline
+      document.getElementById('timeline').innerHTML = champs.map((c, i) => `
+        <div class="timeline-item">
+          ${i % 2 === 0 ? `
+            <div class="tl-content">
+              <div class="tl-card">
+                <div class="tl-year">${c.year}/${String(c.year+1).slice(2)}</div>
+                <div class="tl-team">${c.team} <span class="tl-trophy">🏆</span></div>
+                <div class="tl-detail">${c.pts} pts · ${c.note}</div>
+              </div>
+            </div>
+            <div class="tl-dot champion-year">${c.year}</div>
+            <div class="tl-empty"></div>
+          ` : `
+            <div class="tl-empty"></div>
+            <div class="tl-dot champion-year">${c.year}</div>
+            <div class="tl-content">
+              <div class="tl-card">
+                <div class="tl-year">${c.year}/${String(c.year+1).slice(2)}</div>
+                <div class="tl-team">${c.team} <span class="tl-trophy">🏆</span></div>
+                <div class="tl-detail">${c.pts} pts · ${c.note}</div>
+              </div>
+            </div>
+          `}
+        </div>
+      `).join('');
+    }
+
+    render();
+  </script>
+  <script src="/javascripts/chatbot.js"></script>
+</body>
+</html>

@@ -1,0 +1,221 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Football News - Live Scores</title>
+    <link rel="stylesheet" href="/stylesheets/footBall.css">
+    <style>
+        body {
+            background-image: url('/images/stadium.jpg');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
+            min-height: 100vh;
+        }
+
+        .news-container {
+            margin: 60px auto;
+            background-color: rgba(250, 250, 250, 0.95);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.15);
+            max-width: 800px;
+            text-align: center;
+        }
+
+        .news-container h2 {
+            margin-bottom: 25px;
+            font-size: 2em;
+        }
+
+        #Football-news-list {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        #Football-news-list li {
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        #Football-news-list li a {
+            color: #1a73e8;
+            text-decoration: none;
+        }
+
+        #Football-news-list li a:hover {
+            text-decoration: underline;
+        }
+
+        .back-link {
+            margin-top: 30px;
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #1a73e8;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+
+        .back-link:hover {
+            background-color: #155db2;
+        }
+    </style>
+</head>
+<body>
+    <div class="news-container">
+        <h2>🏉 Latest Football News</h2>
+        <ul id="Football-news-list">
+            <li>Loading news...</li>
+        </ul>
+        <a class="back-link" href="/football">← Back to Football Scores</a>
+    </div>
+
+    <script>
+        const apiKey = "cf08df2bfa754753b90b233a4bafc7f0";
+        const endpoint = `https://newsapi.org/v2/everything?q=rugby&sortBy=publishedAt&language=en&pageSize=5&apiKey=${apiKey}`;
+
+        async function loadFootballNews() {
+            const newsList = document.getElementById("Football-news-list");
+            newsList.innerHTML = "<li>Loading...</li>";
+
+            try {
+                const response = await fetch(endpoint);
+                const data = await response.json();
+
+                if (data.articles && data.articles.length > 0) {
+                    newsList.innerHTML = "";
+                    data.articles.forEach(article => {
+                        const li = document.createElement("li");
+                        li.innerHTML = `<a href="${article.url}" target="_blank">${article.title}</a>`;
+                        newsList.appendChild(li);
+                    });
+                } else {
+                    newsList.innerHTML = "<li>No news found.</li>";
+                }
+            } catch (error) {
+                console.error("Error fetching rugby news:", error);
+                newsList.innerHTML = "<li>Error loading news. Try again later.</li>";
+            }
+        }
+
+        load Football News();
+    </script>
+</body>
+</html> -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Football News - Live Updates</title>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #111;
+      color: #f5f5f5;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #00ffcc;
+      text-shadow: 1px 1px 4px black;
+    }
+
+    .news-container {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      max-width: 900px;
+      margin: auto;
+    }
+
+    .article {
+      background: #1e1e1e;
+      border-radius: 10px;
+      padding: 15px;
+      box-shadow: 0 4px 12px rgba(0, 255, 204, 0.2);
+      transition: transform 0.2s;
+    }
+
+    .article:hover {
+      transform: scale(1.02);
+    }
+
+    .article h3 {
+      margin: 0;
+      font-size: 1.3em;
+      color: #00ffff;
+    }
+
+    .article p {
+      margin: 10px 0;
+      font-size: 0.95em;
+      line-height: 1.5;
+      color: #ddd;
+    }
+
+    .article a {
+      display: inline-block;
+      margin-top: 10px;
+      color: #00ffcc;
+      text-decoration: none;
+    }
+
+    .article a:hover {
+      text-decoration: underline;
+    }
+
+    .loading {
+      text-align: center;
+      margin-top: 30px;
+      font-size: 1.2em;
+      color: #aaa;
+    }
+  </style>
+</head>
+<body>
+  <h1>🏉  News - Live Updates</h1>
+  <div class="news-container" id="newsContainer">
+    <p class="loading">Fetching latest rugby headlines...</p>
+  </div>
+
+  <script>
+    const apiKey = "cf08df2bfa754753b90b233a4bafc7f0"; // 🔑 Replace this with your actual API key from https://newsapi.org/
+    const newsContainer = document.getElementById("newsContainer");
+
+    fetch(`https://newsapi.org/v2/everything?q=rugby&sortBy=publishedAt&language=en&pageSize=10&apiKey=${apiKey}`)
+      .then(response => response.json())
+      .then(data => {
+        newsContainer.innerHTML = ""; // Clear loading text
+
+        if (data.articles && data.articles.length > 0) {
+          data.articles.forEach(article => {
+            const newsElement = document.createElement("div");
+            newsElement.classList.add("article");
+
+            newsElement.innerHTML = `
+              <h3>${article.title}</h3>
+              <p>${article.description || "No description available."}</p>
+              <a href="${article.url}" target="_blank">Read more →</a>
+            `;
+
+            newsContainer.appendChild(newsElement);
+          });
+        } else {
+          newsContainer.innerHTML = "<p>No Football news found.</p>";
+        }
+      })
+      .catch(error => {
+        console.error("Error fetching news:", error);
+        newsContainer.innerHTML = "<p>Error loading news. Please try again later.</p>";
+      });
+  </script>
+<script src="/javascripts/chatbot.js"></script>
+<script src="/javascripts/polish.js"></script>
+</body>
+</html>

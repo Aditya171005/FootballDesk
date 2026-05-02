@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #0d0d0d; color: white; font-family: 'Inter', sans-serif; min-height: 100vh; padding: 24px; background-image: radial-gradient(ellipse at 20% 20%, rgba(30,60,114,0.3) 0%, transparent 60%); }
+    .header { display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, #1e3c72 0%, #0d1b3e 100%); padding: 20px 32px; border-radius: 16px; margin-bottom: 28px; border: 1px solid rgba(255,0,0,0.4); }
+    .header h1 { font-family: 'Bebas Neue', sans-serif; font-size: 32px; letter-spacing: 2px; color: #ff4444; }
+    .header h1 span { color: white; }
+    .header-right { display: flex; gap: 12px; align-items: center; }
+    .badge { background: #ff4444; color: white; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+    .back-btn { background: transparent; color: white; padding: 8px 20px; border-radius: 30px; text-decoration: none; font-weight: 600; font-size: 13px; border: 1px solid rgba(255,255,255,0.3); transition: all 0.2s; }
+    .back-btn:hover { border-color: gold; color: gold; }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 28px; }
+    .stat-card { background: #111827; border-radius: 14px; padding: 20px 24px; border: 1px solid rgba(255,255,255,0.08); text-align: center; }
+    .stat-card .number { font-family: 'Bebas Neue', sans-serif; font-size: 48px; color: gold; line-height: 1; }
+    .stat-card .label { font-size: 12px; color: rgba(255,255,255,0.5); margin-top: 6px; text-transform: uppercase; letter-spacing: 1px; }
+    .section { background: #111827; border-radius: 16px; border: 1px solid rgba(255,255,255,0.08); margin-bottom: 24px; overflow: hidden; }
+    .section-header { padding: 18px 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.02); }
+    .section-header h2 { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 1px; color: gold; }
+    .section-header span { font-size: 12px; color: rgba(255,255,255,0.4); }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th { padding: 12px 16px; text-align: left; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: rgba(255,255,255,0.4); background: rgba(255,255,255,0.02); }
+    td { padding: 13px 16px; border-bottom: 1px solid rgba(255,255,255,0.04); vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(255,255,255,0.02); }
+    .role-badge { padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+    .role-admin { background: rgba(255,68,68,0.2); color: #ff4444; border: 1px solid rgba(255,68,68,0.3); }
+    .role-user { background: rgba(0,196,255,0.1); color: #00c4ff; border: 1px solid rgba(0,196,255,0.2); }
+    .status-badge { padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+    .status-live { background: rgba(0,255,135,0.1); color: #00ff87; border: 1px solid rgba(0,255,135,0.2); }
+    .status-ended { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.4); border: 1px solid rgba(255,255,255,0.1); }
+    .btn { padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; font-family: 'Inter', sans-serif; }
+    .btn-danger { background: rgba(255,68,68,0.15); color: #ff4444; border: 1px solid rgba(255,68,68,0.3); }
+    .btn-danger:hover { background: #ff4444; color: white; }
+    .btn-promote { background: rgba(255,215,0,0.15); color: gold; border: 1px solid rgba(255,215,0,0.3); }
+    .btn-promote:hover { background: gold; color: #0d1b3e; }
+    .btn-demote { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.1); }
+    .btn-demote:hover { background: rgba(255,255,255,0.1); color: white; }
+    .actions { display: flex; gap: 8px; }
+    .empty { padding: 40px; text-align: center; color: rgba(255,255,255,0.3); font-size: 14px; }
+    .alert { padding: 12px 20px; border-radius: 10px; margin-bottom: 20px; font-size: 14px; font-weight: 500; }
+    .alert-success { background: rgba(0,255,135,0.1); color: #00ff87; border: 1px solid rgba(0,255,135,0.2); }
+    .alert-error { background: rgba(255,68,68,0.1); color: #ff4444; border: 1px solid rgba(255,68,68,0.2); }
+    .score { font-weight: 700; color: gold; }
+    .team-vs { color: rgba(255,255,255,0.4); margin: 0 6px; font-size: 12px; }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div>
+      <h1>⚙️ <span>Admin</span> Panel</h1>
+      <p style="font-size:13px;color:rgba(255,255,255,0.4);margin-top:4px;">Logged in as <strong style="color:white"><%= admin.username %></strong></p>
+    </div>
+    <div class="header-right">
+      <span class="badge">ADMIN</span>
+      <a href="/" class="back-btn">← Back to Home</a>
+      <a href="/logout" class="back-btn" style="border-color:rgba(255,68,68,0.4);color:#ff4444;">Logout</a>
+    </div>
+  </div>
+
+  <% if (message) { %>
+    <div class="alert alert-success"><%= message %></div>
+  <% } %>
+  <% if (error) { %>
+    <div class="alert alert-error"><%= error %></div>
+  <% } %>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="number"><%= users.length %></div>
+      <div class="label">Total Users</div>
+    </div>
+    <div class="stat-card">
+      <div class="number"><%= users.filter(u => u.role === 'admin').length %></div>
+      <div class="label">Admins</div>
+    </div>
+    <div class="stat-card">
+      <div class="number"><%= matches.length %></div>
+      <div class="label">Total Matches</div>
+    </div>
+    <div class="stat-card">
+      <div class="number"><%= matches.filter(m => m.status === 'Live').length %></div>
+      <div class="label">Live Matches</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <h2>👥 Users</h2>
+      <span><%= users.length %> total</span>
+    </div>
+    <% if (users.length === 0) { %>
+      <div class="empty">No users found</div>
+    <% } else { %>
+    <div style="overflow-x:auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>Username</th>
+            <th>Role</th>
+            <th>Joined</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% users.forEach(user => { %>
+          <tr>
+            <td><strong><%= user.username || 'N/A' %></strong></td>
+            <td><span class="role-badge <%= user.role === 'admin' ? 'role-admin' : 'role-user' %>"><%= user.role %></span></td>
+            <td style="color:rgba(255,255,255,0.4);font-size:13px"><%= new Date(user.createdAt).toLocaleDateString() %></td>
+            <td>
+              <div class="actions">
+                <% if (user.role !== 'admin') { %>
+                  <form method="POST" action="/admin/users/<%= user._id %>/promote">
+                    <button type="submit" class="btn btn-promote">Make Admin</button>
+                  </form>
+                <% } else if (user._id.toString() !== admin._id.toString()) { %>
+                  <form method="POST" action="/admin/users/<%= user._id %>/demote">
+                    <button type="submit" class="btn btn-demote">Remove Admin</button>
+                  </form>
+                <% } %>
+                <% if (user._id.toString() !== admin._id.toString()) { %>
+                  <form method="POST" action="/admin/users/<%= user._id %>/delete" onsubmit="return confirm('Delete this user?')">
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                  </form>
+                <% } else { %>
+                  <span style="font-size:12px;color:rgba(255,255,255,0.3)">You</span>
+                <% } %>
+              </div>
+            </td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+    <% } %>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <h2>⚽ Matches</h2>
+      <span><%= matches.length %> total</span>
+    </div>
+    <% if (matches.length === 0) { %>
+      <div class="empty">No matches found</div>
+    <% } else { %>
+    <div style="overflow-x:auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>Match</th>
+            <th>Score</th>
+            <th>Winner</th>
+            <th>Status</th>
+            <th>Created</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% matches.forEach(match => { %>
+          <tr>
+            <td><strong><%= match.team1 %></strong><span class="team-vs">VS</span><strong><%= match.team2 %></strong></td>
+            <td class="score"><%= match.totalPoints1 %> - <%= match.totalPoints2 %></td>
+            <td style="color:rgba(255,255,255,0.6);font-size:13px"><%= match.winner || 'TBD' %></td>
+            <td><span class="status-badge <%= match.status === 'Live' ? 'status-live' : 'status-ended' %>"><%= match.status %></span></td>
+            <td style="color:rgba(255,255,255,0.4);font-size:13px"><%= new Date(match.createdAt).toLocaleDateString() %></td>
+            <td>
+              <form method="POST" action="/admin/matches/<%= match._id %>/delete" onsubmit="return confirm('Delete this match?')">
+                <button type="submit" class="btn btn-danger">Delete</button>
+              </form>
+            </td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+    <% } %>
+  </div>
+<script src="/javascripts/chatbot.js"></script>
+<script src="/javascripts/polish.js"></script>
+</body>
+</html>

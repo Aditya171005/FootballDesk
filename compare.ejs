@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Player Comparison | Football Hub</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'DM Sans', sans-serif; background: #0a0e17; color: white; min-height: 100vh; }
+
+    header { background: rgba(8,12,20,0.95); backdrop-filter: blur(12px); padding: 0 40px; display: flex; justify-content: space-between; align-items: center; position: fixed; top:0; left:0; right:0; z-index: 200; height: 70px; border-bottom: 1px solid rgba(255,215,0,0.1); }
+    .logo { height: 50px; width: auto; }
+    nav ul { display:flex; gap:4px; list-style:none; padding:0; margin:0; align-items:center; }
+    nav a { color:rgba(255,255,255,0.7); text-decoration:none; font-weight:600; font-size:13px; padding:7px 13px; border-radius:8px; transition:all 0.2s; }
+    nav a:hover { color:#FFD700; background:rgba(255,215,0,0.08); }
+    nav a.login-btn { background:#f70404; color:white; border-radius:20px; padding:7px 18px; }
+    .nav-more { position:relative; }
+    .nav-more-btn { color:rgba(255,255,255,0.7); background:none; border:none; font-weight:600; font-size:13px; padding:7px 13px; border-radius:8px; cursor:pointer; font-family:'DM Sans',sans-serif; transition:all 0.2s; display:flex; align-items:center; gap:4px; }
+    .nav-more-btn:hover { color:#FFD700; background:rgba(255,215,0,0.08); }
+    .nav-more-btn .arrow { font-size:10px; transition:transform 0.2s; }
+    .nav-more.open .nav-more-btn .arrow { transform:rotate(180deg); }
+    .more-dropdown { display:none; position:absolute; top:calc(100% + 8px); right:0; background:#0f1623; border:1px solid rgba(255,215,0,0.2); border-radius:14px; overflow:hidden; z-index:999; box-shadow:0 20px 60px rgba(0,0,0,0.7); min-width:200px; }
+    .nav-more.open .more-dropdown { display:block; }
+    .more-dropdown a { display:flex; align-items:center; gap:10px; padding:11px 16px; color:rgba(255,255,255,0.8); text-decoration:none; font-size:13px; font-weight:600; transition:all 0.15s; border-bottom:1px solid rgba(255,255,255,0.04); }
+    .more-dropdown a:last-child { border-bottom:none; }
+    .more-dropdown a:hover { background:rgba(255,215,0,0.07); color:#FFD700; }
+
+    .page { padding: 100px 20px 60px; max-width: 1000px; margin: 0 auto; }
+    .page-header { text-align:center; margin-bottom:40px; }
+    .page-header h1 { font-family:'Bebas Neue',sans-serif; font-size:56px; letter-spacing:3px; }
+    .page-header h1 span { color:#FFD700; }
+    .page-header p { color:rgba(255,255,255,0.5); margin-top:8px; font-size:16px; }
+
+    /* SEARCH PANELS */
+    .search-panels { display:grid; grid-template-columns:1fr auto 1fr; gap:20px; align-items:start; margin-bottom:32px; }
+    .vs-badge { font-family:'Bebas Neue',sans-serif; font-size:36px; color:#FFD700; text-align:center; padding-top:8px; }
+    .player-panel { background:#0f1623; border-radius:16px; border:1px solid rgba(255,255,255,0.08); padding:20px; }
+    .player-label { font-size:12px; font-weight:700; color:rgba(255,255,255,0.4); text-transform:uppercase; letter-spacing:1px; margin-bottom:10px; }
+    .search-input {
+      width:100%; padding:12px 16px; background:#141d2e; border:1px solid rgba(255,255,255,0.1);
+      border-radius:10px; color:white; font-size:14px; font-family:'DM Sans',sans-serif; outline:none; transition:all 0.2s;
+    }
+    .search-input:focus { border-color:rgba(255,215,0,0.4); }
+    .search-input::placeholder { color:rgba(255,255,255,0.3); }
+    .league-select {
+      width:100%; padding:10px 14px; background:#141d2e; border:1px solid rgba(255,255,255,0.1);
+      border-radius:10px; color:rgba(255,255,255,0.8); font-size:13px; font-family:'DM Sans',sans-serif; outline:none; margin-top:8px; cursor:pointer;
+    }
+    .results-list { margin-top:10px; max-height:180px; overflow-y:auto; }
+    .result-item { display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:8px; cursor:pointer; transition:all 0.15s; border-bottom:1px solid rgba(255,255,255,0.04); }
+    .result-item:hover { background:rgba(255,215,0,0.07); }
+    .result-item.selected { background:rgba(255,215,0,0.1); border:1px solid rgba(255,215,0,0.2); border-radius:10px; }
+    .result-name { font-weight:700; font-size:13px; }
+    .result-meta { font-size:11px; color:rgba(255,255,255,0.4); }
+    .result-goals { font-family:'Bebas Neue',sans-serif; font-size:20px; color:#FFD700; margin-left:auto; }
+
+    .compare-btn {
+      display:block; width:100%; max-width:300px; margin:0 auto 40px;
+      padding:14px 28px; background:linear-gradient(135deg,#FFD700,#FFA500); border:none;
+      border-radius:30px; color:#000; font-size:15px; font-weight:700;
+      font-family:'DM Sans',sans-serif; cursor:pointer; transition:all 0.2s;
+    }
+    .compare-btn:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(255,215,0,0.3); }
+    .compare-btn:disabled { opacity:0.4; cursor:not-allowed; transform:none; }
+
+    /* COMPARISON RESULT */
+    #compare-result { display:none; animation:fadeIn 0.5s ease; }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+
+    .compare-grid { display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-bottom:32px; }
+    .player-card { background:#0f1623; border-radius:16px; border:1px solid rgba(255,255,255,0.08); padding:24px; text-align:center; }
+    .player-card.winner { border-color:rgba(255,215,0,0.4); box-shadow:0 0 30px rgba(255,215,0,0.1); }
+    .player-card-name { font-family:'Bebas Neue',sans-serif; font-size:24px; color:white; margin-bottom:4px; }
+    .player-card-team { font-size:13px; color:rgba(255,255,255,0.5); margin-bottom:16px; }
+    .player-big-stat { font-family:'Bebas Neue',sans-serif; font-size:64px; color:#FFD700; line-height:1; }
+    .player-big-label { font-size:12px; color:rgba(255,255,255,0.4); text-transform:uppercase; letter-spacing:1px; }
+    .winner-badge { display:inline-block; background:#FFD700; color:#000; font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; margin-top:8px; }
+
+    .stat-bars { background:#0f1623; border-radius:16px; border:1px solid rgba(255,255,255,0.08); padding:24px; }
+    .stat-bars-title { font-family:'Bebas Neue',sans-serif; font-size:20px; color:white; margin-bottom:20px; text-align:center; }
+    .stat-row { margin-bottom:20px; }
+    .stat-row-header { display:flex; justify-content:space-between; font-size:13px; font-weight:700; margin-bottom:8px; }
+    .stat-row-label { color:rgba(255,255,255,0.5); text-align:center; font-size:12px; text-transform:uppercase; letter-spacing:0.5px; }
+    .stat-bars-wrap { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    .stat-bar-wrap { display:flex; align-items:center; gap:8px; }
+    .stat-bar-wrap.right { flex-direction:row-reverse; }
+    .stat-val { font-family:'Bebas Neue',sans-serif; font-size:18px; color:#FFD700; min-width:28px; text-align:center; }
+    .stat-bar-bg { flex:1; height:8px; background:rgba(255,255,255,0.06); border-radius:4px; overflow:hidden; }
+    .stat-bar-fill { height:100%; background:linear-gradient(90deg,#1a56ff,#4f7cff); border-radius:4px; transition:width 0.8s ease; }
+    .stat-bar-fill.gold { background:linear-gradient(90deg,#FFD700,#FFA500); }
+
+    .no-data { text-align:center; padding:60px; color:rgba(255,255,255,0.4); font-size:15px; }
+    .error-msg { background:rgba(255,68,68,0.1); border:1px solid rgba(255,68,68,0.2); border-radius:12px; padding:16px; text-align:center; color:#ff6464; margin-bottom:24px; display:none; }
+
+    footer { background:#080c14; border-top:1px solid rgba(255,215,0,0.08); text-align:center; padding:24px; font-size:13px; color:rgba(255,255,255,0.3); margin-top:60px; }
+
+    @media(max-width:640px) {
+      .search-panels { grid-template-columns:1fr; }
+      .vs-badge { padding:0; }
+      .compare-grid { grid-template-columns:1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <img src="/images/logo2.jpg" alt="Logo" class="logo">
+    <nav>
+      <ul>
+        <li><a href="/">Home</a></li>
+        <li><a href="/standings">🏆 Standings</a></li>
+        <li><a href="/fixtures">📅 Fixtures</a></li>
+        <li><a href="/scorers">⚽ Scorers</a></li>
+        <li class="nav-more" id="nav-more">
+          <button class="nav-more-btn" onclick="toggleMore()">More <span class="arrow">▾</span></button>
+          <div class="more-dropdown">
+            <a href="/quiz">🧠 Football Quiz</a>
+            <a href="/compare" style="color:#FFD700;">⚖️ Player Compare</a>
+            <a href="/history">🏅 League History</a>
+            <a href="/today">📅 Today's Matches</a>
+            <a href="/news">📰 News</a>
+          </div>
+        </li>
+        <li><a href="/loginpage" class="login-btn">Login</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <div class="page">
+    <div class="page-header">
+      <h1>Player <span>Comparison</span></h1>
+      <p>Head-to-head stats from the current 2025/26 season</p>
+    </div>
+
+    <div class="error-msg" id="error-msg"></div>
+
+    <div class="search-panels">
+      <!-- PLAYER 1 -->
+      <div class="player-panel">
+        <div class="player-label">Player 1</div>
+        <select class="league-select" id="league1" onchange="fetchScorers(1)">
+          <option value="PL">Premier League</option>
+          <option value="PD">La Liga</option>
+          <option value="BL1">Bundesliga</option>
+          <option value="SA">Serie A</option>
+          <option value="FL1">Ligue 1</option>
+        </select>
+        <input type="text" class="search-input" id="search1" placeholder="Search player..." oninput="filterPlayers(1)" style="margin-top:8px;">
+        <div class="results-list" id="list1"></div>
+      </div>
+
+      <div class="vs-badge">VS</div>
+
+      <!-- PLAYER 2 -->
+      <div class="player-panel">
+        <div class="player-label">Player 2</div>
+        <select class="league-select" id="league2" onchange="fetchScorers(2)">
+          <option value="PL">Premier League</option>
+          <option value="PD">La Liga</option>
+          <option value="BL1">Bundesliga</option>
+          <option value="SA">Serie A</option>
+          <option value="FL1">Ligue 1</option>
+        </select>
+        <input type="text" class="search-input" id="search2" placeholder="Search player..." oninput="filterPlayers(2)" style="margin-top:8px;">
+        <div class="results-list" id="list2"></div>
+      </div>
+    </div>
+
+    <button class="compare-btn" id="compare-btn" onclick="doCompare()" disabled>Compare Players ⚖️</button>
+
+    <!-- RESULT -->
+    <div id="compare-result">
+      <div class="compare-grid">
+        <div class="player-card" id="card1">
+          <div class="player-card-name" id="p1-name">-</div>
+          <div class="player-card-team" id="p1-team">-</div>
+          <div class="player-big-stat" id="p1-goals">0</div>
+          <div class="player-big-label">Goals</div>
+          <div id="p1-winner" style="display:none"><span class="winner-badge">🏆 WINNER</span></div>
+        </div>
+        <div class="player-card" id="card2">
+          <div class="player-card-name" id="p2-name">-</div>
+          <div class="player-card-team" id="p2-team">-</div>
+          <div class="player-big-stat" id="p2-goals">0</div>
+          <div class="player-big-label">Goals</div>
+          <div id="p2-winner" style="display:none"><span class="winner-badge">🏆 WINNER</span></div>
+        </div>
+      </div>
+
+      <div class="stat-bars">
+        <div class="stat-bars-title">Head-to-Head Stats</div>
+        <div id="stat-rows"></div>
+      </div>
+    </div>
+  </div>
+
+  <footer><p>&copy; 2026 Football World. All rights reserved.</p></footer>
+
+  <script>
+    function toggleMore() { document.getElementById('nav-more').classList.toggle('open'); }
+    document.addEventListener('click', (e) => { if (!e.target.closest('#nav-more')) document.getElementById('nav-more').classList.remove('open'); });
+
+    const scorersCache = {};
+    let scorers1 = [], scorers2 = [];
+    let selected1 = null, selected2 = null;
+
+    async function fetchScorers(num) {
+      const league = document.getElementById(`league${num}`).value;
+      if (scorersCache[league]) {
+        if (num === 1) scorers1 = scorersCache[league];
+        else scorers2 = scorersCache[league];
+        filterPlayers(num);
+        return;
+      }
+      try {
+        const res = await fetch(`/api/scorers/${league}`);
+        const data = await res.json();
+        scorersCache[league] = data.scorers || [];
+        if (num === 1) scorers1 = scorersCache[league];
+        else scorers2 = scorersCache[league];
+        filterPlayers(num);
+      } catch(e) { console.error(e); }
+    }
+
+    function filterPlayers(num) {
+      const q = document.getElementById(`search${num}`).value.toLowerCase().trim();
+      const list = document.getElementById(`list${num}`);
+      const scorers = num === 1 ? scorers1 : scorers2;
+      if (!q || q.length < 2) { list.innerHTML = ''; return; }
+      const filtered = scorers.filter(s => s.player.name.toLowerCase().includes(q)).slice(0, 6);
+      list.innerHTML = filtered.map((s, i) => `
+        <div class="result-item" onclick="selectPlayer(${num}, ${i}, ${JSON.stringify(s).replace(/"/g, '&quot;')})">
+          <div>
+            <div class="result-name">${s.player.name}</div>
+            <div class="result-meta">${s.team.name}</div>
+          </div>
+          <div class="result-goals">${s.goals}</div>
+        </div>
+      `).join('') || '<div style="padding:12px;color:rgba(255,255,255,0.3);font-size:13px;">No players found</div>';
+    }
+
+    function selectPlayer(num, idx, data) {
+      if (num === 1) { selected1 = data; document.getElementById('search1').value = data.player.name; }
+      else { selected2 = data; document.getElementById('search2').value = data.player.name; }
+      document.getElementById(`list${num}`).innerHTML = '';
+      document.getElementById('compare-btn').disabled = !(selected1 && selected2);
+    }
+
+    function doCompare() {
+      if (!selected1 || !selected2) return;
+      const p1 = selected1, p2 = selected2;
+      const result = document.getElementById('compare-result');
+      result.style.display = 'block';
+      result.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+      // Names
+      document.getElementById('p1-name').textContent = p1.player.name;
+      document.getElementById('p1-team').textContent = p1.team.name;
+      document.getElementById('p2-name').textContent = p2.player.name;
+      document.getElementById('p2-team').textContent = p2.team.name;
+      document.getElementById('p1-goals').textContent = p1.goals;
+      document.getElementById('p2-goals').textContent = p2.goals;
+
+      // Winner badge
+      const p1wins = p1.goals > p2.goals;
+      const p2wins = p2.goals > p1.goals;
+      document.getElementById('p1-winner').style.display = p1wins ? 'block' : 'none';
+      document.getElementById('p2-winner').style.display = p2wins ? 'block' : 'none';
+      document.getElementById('card1').className = 'player-card' + (p1wins ? ' winner' : '');
+      document.getElementById('card2').className = 'player-card' + (p2wins ? ' winner' : '');
+
+      // Stat bars
+      const stats = [
+        { label: 'Goals', v1: p1.goals || 0, v2: p2.goals || 0 },
+        { label: 'Assists', v1: p1.assists || 0, v2: p2.assists || 0 },
+        { label: 'Games Played', v1: p1.playedMatches || 0, v2: p2.playedMatches || 0 },
+        { label: 'Goals per Game', v1: p1.playedMatches ? (p1.goals / p1.playedMatches).toFixed(2) : 0, v2: p2.playedMatches ? (p2.goals / p2.playedMatches).toFixed(2) : 0 },
+        { label: 'Penalties', v1: p1.penalties || 0, v2: p2.penalties || 0 },
+      ];
+
+      const rowsHTML = stats.map(s => {
+        const max = Math.max(parseFloat(s.v1), parseFloat(s.v2), 1);
+        const pct1 = (parseFloat(s.v1) / max) * 100;
+        const pct2 = (parseFloat(s.v2) / max) * 100;
+        const p1w = parseFloat(s.v1) > parseFloat(s.v2);
+        const p2w = parseFloat(s.v2) > parseFloat(s.v1);
+        return `
+          <div class="stat-row">
+            <div class="stat-row-label">${s.label}</div>
+            <div class="stat-bars-wrap">
+              <div class="stat-bar-wrap right">
+                <div class="stat-bar-bg"><div class="stat-bar-fill ${p1w ? 'gold' : ''}" style="width:${pct1}%"></div></div>
+                <div class="stat-val">${s.v1}</div>
+              </div>
+              <div class="stat-bar-wrap">
+                <div class="stat-bar-bg"><div class="stat-bar-fill ${p2w ? 'gold' : ''}" style="width:${pct2}%"></div></div>
+                <div class="stat-val">${s.v2}</div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+      document.getElementById('stat-rows').innerHTML = rowsHTML;
+    }
+
+    // Load default scorers on page load
+    fetchScorers(1);
+    fetchScorers(2);
+  </script>
+  <script src="/javascripts/chatbot.js"></script>
+</body>
+</html>

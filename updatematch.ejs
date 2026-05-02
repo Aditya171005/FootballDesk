@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Football Match</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;600;700&display=swap');
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        /* NAVBAR STYLES */
+        header {
+            background: rgba(8,12,20,0.97); 
+            backdrop-filter: blur(16px);
+            padding: 0 40px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            right: 0; 
+            z-index: 200; 
+            height: 78px;
+            border-bottom: 1px solid rgba(255,215,0,0.1);
+        }
+        .logo { height: 62px; width: auto; }
+        nav ul { 
+            display: flex; 
+            gap: 4px; 
+            list-style: none; 
+            padding: 0; 
+            margin: 0; 
+            align-items: center; 
+        }
+        nav a { 
+            color: rgba(255,255,255,0.9); 
+            text-decoration: none; 
+            font-weight: 600; 
+            font-size: 15px; 
+            padding: 8px 14px; 
+            border-radius: 8px; 
+            transition: all 0.2s; 
+            font-family: 'DM Sans', sans-serif;
+        }
+        nav a:hover { 
+            color: #FFD700; 
+            background: rgba(255,215,0,0.08); 
+        }
+        nav a.login-btn { 
+            background: #f70404; 
+            color: white; 
+            border-radius: 20px; 
+            padding: 7px 18px; 
+        }
+
+        .nav-more { position: relative; }
+        .nav-more-btn { 
+            color: rgba(255,255,255,0.9); 
+            background: none; 
+            border: none; 
+            font-weight: 600; 
+            font-size: 15px; 
+            padding: 8px 14px; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-family: 'DM Sans', sans-serif;
+            transition: all 0.2s; 
+            display: flex; 
+            align-items: center; 
+            gap: 4px; 
+        }
+        .nav-more-btn:hover { 
+            color: #FFD700; 
+            background: rgba(255,215,0,0.08); 
+        }
+        .nav-more-btn .arrow { 
+            font-size: 10px; 
+            transition: transform 0.2s; 
+        }
+        .nav-more.open .nav-more-btn .arrow { 
+            transform: rotate(180deg); 
+        }
+        .more-dropdown { 
+            display: none; 
+            position: absolute; 
+            top: calc(100% + 8px); 
+            right: 0;
+            background: #0f1623; 
+            border: 1px solid rgba(255,215,0,0.2); 
+            border-radius: 14px;
+            overflow: hidden; 
+            z-index: 999; 
+            box-shadow: 0 20px 60px rgba(0,0,0,0.7); 
+            min-width: 200px; 
+        }
+        .nav-more.open .more-dropdown { 
+            display: block; 
+        }
+        .more-dropdown a { 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            padding: 11px 16px;
+            color: rgba(255,255,255,0.8); 
+            text-decoration: none; 
+            font-size: 13px; 
+            font-weight: 600;
+            transition: all 0.15s; 
+            border-bottom: 1px solid rgba(255,255,255,0.04); 
+        }
+        .more-dropdown a:last-child { 
+            border-bottom: none; 
+        }
+        .more-dropdown a:hover { 
+            background: rgba(255,215,0,0.07); 
+            color: #FFD700; 
+        }
+        .more-dropdown a .icon { 
+            font-size: 16px; 
+            width: 20px; 
+            text-align: center; 
+        }
+
+        /* MATCH PAGE STYLES */
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: url("/images/stadium6.jpg") no-repeat center center fixed;
+            background-size: cover;
+            color: white;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            padding-top: 78px; /* Space for fixed navbar */
+        }
+        h2 {
+            text-shadow: 2px 2px 5px rgba(21, 27, 27, 0.8);
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(100px);
+            padding: 20px;
+            border-radius: 15px;
+            width: 60%;
+            margin: auto;
+            box-shadow: 0px 0px 15px rgba(237, 238, 238, 0.6);
+        }
+        .scoreboard {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+        }
+        .team {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(100px);
+            padding: 20px;
+            border-radius: 15px;
+            width: 40%;
+            box-shadow: 0px 0px 10px rgba(254, 255, 255, 0.5);
+            transition: 0.3s ease;
+        }
+        .team:hover {
+            transform: scale(1.05);
+            box-shadow: 0px 0px 20px rgba(254, 255, 255, 0.5);
+        }
+        input {
+            width: 50px;
+            text-align: center;
+            padding: 8px;
+            border-radius: 5px;
+            border: none;
+            font-size: 16px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            outline: none;
+            transition: 0.3s ease;
+        }
+        .update-btn {
+            background: linear-gradient(45deg, #00ff99, #0066ff);
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            cursor: pointer;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: 0.3s ease;
+            margin-top: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 255, 255, 0.5);
+        }
+        .update-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0px 0px 20px rgba(0, 255, 255, 0.8);
+        }
+        label {
+            font-weight: bold;
+            color: #e4ebe8;
+            text-shadow: 1px 1px 5px rgba(254, 255, 255, 0.5);
+        }
+        .chart-btn-container {
+            margin-top: 20px;
+        }
+
+        .chart-btn {
+            background: linear-gradient(45deg, #ffa500, #ff4500);
+            box-shadow: 0px 0px 12px rgba(255, 140, 0, 0.6);
+        }
+
+        .chart-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0px 0px 20px rgba(255, 165, 0, 0.9);
+        }
+
+        @media (max-width: 768px) {
+            header { padding: 0 16px; }
+            nav a { font-size: 12px; padding: 6px 10px; }
+            .container { width: 90%; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <header>
+        <img src="/images/logo2.jpg" alt="Football Logo" class="logo">
+        <nav>
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/localTeams">Local Matches</a></li>
+                <li><a href="/footBall">Live Matches</a></li>
+                <li><a href="/standings">🏆 Standings</a></li>
+                <li><a href="/fixtures">📅 Fixtures</a></li>
+                <li><a href="/scorers">⚽ Scorers</a></li>
+                <li><a href="/champions-league">🏆 UCL</a></li>
+                <li class="nav-more" id="nav-more">
+                    <button class="nav-more-btn" onclick="toggleMore()">More <span class="arrow">▾</span></button>
+                    <div class="more-dropdown">
+                        <a href="/quiz"><span class="icon">🧠</span> Football Quiz</a>
+                        <a href="/compare"><span class="icon">⚖️</span> Player Compare</a>
+                        <a href="/history"><span class="icon">🏅</span> League History</a>
+                        <a href="/today"><span class="icon">📅</span> Today's Matches</a>
+                        <a href="/local-match"><span class="icon">⚽</span> Local Match</a>
+                        <a href="/news"><span class="icon">📰</span> News</a>
+                    </div>
+                </li>
+                <li><a href="/about">About</a></li>
+                <li><a href="/loginpage" class="login-btn">Login</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- MATCH CONTENT -->
+    <h2>⚽ Update Match Details ⚽</h2>
+    <div class="container">
+        <label>Team 1 Name:</label>
+        <input type="text" id="team1-input" placeholder="Enter Team 1">
+        <label>Team 2 Name:</label>
+        <input type="text" id="team2-input" placeholder="Enter Team 2">
+        <button class="update-btn" onclick="updateTeams()">Update Teams</button>
+    </div>
+    
+    <h2>🏆 Match 🏆</h2>
+    <h2>⏳ Match Time ⏳: <span id="matchTime">0</span> mins </h2>
+    <button class="update-btn" onclick="startMatch()">Start Match</button>
+    <button class="update-btn" onclick="endMatch()" style="background-color: red;">End Match</button>
+    <h2 id="winnerMessage" style="color: yellow; font-size: 35px; margin-top: 20px; text-shadow: 2px 2px 5px black;"></h2>
+
+    <div class="scoreboard">
+        <div class="team">
+            <h2 id="team1Display">Team 1</h2>
+            <label>Goals:</label> <input type="number" id="score1-input" value="0">
+            <label>Touchdowns:</label> <input type="number" id="touchdowns1-input" value="0">
+            <label>Safeties:</label> <input type="number" id="safeties1-input" value="0">
+            <label>Fouls:</label> <input type="number" id="fouls1-input" value="0">
+            <h2>Points: <span id="points1">0</span></h2>
+        </div>
+        <div class="team">
+            <h2 id="team2Display">Team 2</h2>
+            <label>Goals:</label> <input type="number" id="score2-input" value="0">
+            <label>Touchdowns:</label> <input type="number" id="touchdowns2-input" value="0">
+            <label>Safeties:</label> <input type="number" id="safeties2-input" value="0">
+            <label>Fouls:</label> <input type="number" id="fouls2-input" value="0">
+            <h2>Points: <span id="points2">0</span></h2>
+        </div>
+    </div>
+
+    <button class="update-btn" onclick="updateMatch()">Update Match</button>
+    
+    <!-- 🔥 Styled View Goal Chart Button -->
+    <div class="chart-btn-container">
+        <a href='/chart'>
+            <button class="update-btn chart-btn">📊 View Goal Chart</button>
+        </a>
+    </div>
+
+    <!-- NAVBAR DROPDOWN SCRIPT -->
+    <script>
+        function toggleMore() {
+            document.getElementById('nav-more').classList.toggle('open');
+        }
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('#nav-more')) {
+                document.getElementById('nav-more').classList.remove('open');
+            }
+        });
+    </script>
+
+    <!-- MATCH LOGIC SCRIPT -->
+    <script>
+        let matchId = null;
+        let matchStarted = false;
+        let matchTime = 0;
+        let timer = null;
+        let updateLog = []; // to store update timestamps
+
+        // Function to create a new match
+        async function createMatch() {
+            let team1 = document.getElementById("team1-input").value;
+            let team2 = document.getElementById("team2-input").value;
+
+            if (!team1 || !team2) {
+                alert("Please enter both team names.");
+                return;
+            }
+
+            try {
+                let response = await fetch("/match", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ team1, team2 })
+                });
+
+                let data = await response.json();
+                if (response.ok) {
+                    matchId = data.match?._id;
+                    console.log("Match Created with ID:", matchId);
+                    document.getElementById("team1Display").textContent = team1;
+                    document.getElementById("team2Display").textContent = team2;
+                    alert("Match created successfully!");
+                } else {
+                    throw new Error(data.error);
+                }
+            } catch (error) {
+                console.error("Error creating match:", error);
+            }
+        }
+
+        function startMatch() {
+            if (!matchId) {
+                alert("Please create a match first.");
+                return;
+            }
+
+            if (!timer) {
+                matchStarted = true;
+                timer = setInterval(updateMatchTime, 5000);
+                alert("⚽ Match Started! Let the game begin!");
+            }
+        }
+
+        function endMatch() {
+            if (timer) {
+                clearInterval(timer);
+                timer = null;
+                matchStarted = false;
+
+                updateMatch(); // Final update
+
+                // ✅ Save final update log to sessionStorage
+                sessionStorage.setItem("matchLog", JSON.stringify(updateLog));
+
+                setTimeout(() => {
+                    showWinner();
+                    alert("🏁 Match has ended!");
+                }, 500);
+            }
+        }
+
+        function updateMatchTime() {
+            if (matchTime < 90) {
+                matchTime += 5;
+                document.getElementById("matchTime").textContent = matchTime;
+            } else {
+                endMatch();
+            }
+        }
+
+        async function updateTeams() {
+            let team1 = document.getElementById("team1-input").value;
+            let team2 = document.getElementById("team2-input").value;
+
+            if (!team1 || !team2) {
+                alert("Please enter both team names.");
+                return;
+            }
+
+            if (!matchId) {
+                console.log("Match ID is null. Creating a new match...");
+                await createMatch();
+            }
+
+            if (!matchId) {
+                alert("Failed to create match. Please try again.");
+                return;
+            }
+
+            try {
+                console.log(`Updating teams for match ID: ${matchId}`);
+                let response = await fetch(`/match/update/${matchId}`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ team1, team2 })
+                });
+
+                let data = await response.json();
+                if (response.ok) {
+                    document.getElementById("team1Display").textContent = team1;
+                    document.getElementById("team2Display").textContent = team2;
+                    alert("Teams updated successfully!");
+                } else {
+                    throw new Error(data.error);
+                }
+            } catch (error) {
+                console.error("Error updating teams:", error);
+            }
+        }
+
+        // ✅ Updated function to also capture match time & real time
+        async function updateMatch() {
+            if (!matchStarted) {
+                alert("🚨 Please start the match first! 🚨");
+                return;
+            }
+
+            // Capture timestamp info
+            const atMinute = matchTime;
+            const realTime = new Date().toISOString();
+
+            let goals1 = parseInt(document.getElementById("score1-input").value) || 0;
+            let goals2 = parseInt(document.getElementById("score2-input").value) || 0;
+            let touchdowns1 = parseInt(document.getElementById("touchdowns1-input").value) || 0;
+            let touchdowns2 = parseInt(document.getElementById("touchdowns2-input").value) || 0;
+            let safeties1 = parseInt(document.getElementById("safeties1-input").value) || 0;
+            let safeties2 = parseInt(document.getElementById("safeties2-input").value) || 0;
+            let fouls1 = parseInt(document.getElementById("fouls1-input").value) || 0;
+            let fouls2 = parseInt(document.getElementById("fouls2-input").value) || 0;
+
+            let totalPoints1 = (goals1 * 3) + (touchdowns1 * 6) + (safeties1 * 2) - fouls1;
+            let totalPoints2 = (goals2 * 3) + (touchdowns2 * 6) + (safeties2 * 2) - fouls2;
+
+            document.getElementById("points1").textContent = totalPoints1;
+            document.getElementById("points2").textContent = totalPoints2;
+
+            // ✅ Store update in the log
+            updateLog.push({ atMinute, realTime, goals1, goals2 });
+
+            // ✅ Save live log to sessionStorage so chart page can access it
+            sessionStorage.setItem("matchLog", JSON.stringify(updateLog));
+
+            console.table(updateLog);
+
+            if (matchId) {
+                try {
+                    console.log(`Updating match ID: ${matchId}`);
+                    await fetch(`/match/update/${matchId}`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ 
+                            goals1, goals2, touchdowns1, touchdowns2, 
+                            safeties1, safeties2, fouls1, fouls2,
+                            timestamp: realTime,
+                            matchMinute: atMinute
+                        })
+                    });
+                } catch (error) {
+                    console.error("Error updating match:", error);
+                }
+            }
+        }
+
+        function showWinner() {
+            let points1 = parseInt(document.getElementById("points1").textContent) || 0;
+            let points2 = parseInt(document.getElementById("points2").textContent) || 0;
+            let team1 = document.getElementById("team1Display").textContent;
+            let team2 = document.getElementById("team2Display").textContent;
+            let winnerMessage = document.getElementById("winnerMessage");
+
+            if (points1 > points2) {
+                winnerMessage.textContent = `🏆 ${team1} Wins! 🎉`;
+            } else if (points1 < points2) {
+                winnerMessage.textContent = `🏆 ${team2} Wins! 🎉`;
+            } else {
+                winnerMessage.textContent = `🤝 It's a Draw!`;
+            }
+        }
+    </script>
+    
+    <script src="/javascripts/chatbot.js"></script>
+    <script src="/javascripts/polish.js"></script>
+</body>
+</html>

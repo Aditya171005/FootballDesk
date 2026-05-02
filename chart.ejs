@@ -1,0 +1,230 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Goals Over Time Chart</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h2>📈 Goals Over Time</h2>
+    <canvas id="goalChart" width="600" height="300"></canvas>
+
+    <script>
+        const updateLog = JSON.parse(sessionStorage.getItem("matchLog")) || [];
+
+        const labels = updateLog.map(entry => `${entry.atMinute}'`);
+        const team1Goals = updateLog.map(entry => entry.goals1);
+        const team2Goals = updateLog.map(entry => entry.goals2);
+
+        const data = {
+            labels,
+            datasets: [
+                {
+                    label: "Team 1 Goals",
+                    data: team1Goals,
+                    borderColor: "blue",
+                    fill: false,
+                    tension: 0.2
+                },
+                {
+                    label: "Team 2 Goals",
+                    data: team2Goals,
+                    borderColor: "red",
+                    fill: false,
+                    tension: 0.2
+                }
+            ]
+        };
+
+        const config = {
+            type: 'line',
+            data,
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Goals Scored Over Time'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Goals'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Match Time (minutes)'
+                        }
+                    }
+                }
+            }
+        };
+
+        new Chart(document.getElementById("goalChart"), config);
+    </script>
+</body>
+</html> -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Goals Over Time Chart</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+
+        h2 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 6px #000;
+        }
+
+        canvas {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+            padding: 15px;
+            max-width: 100%;
+        }
+
+        .back-btn {
+            margin-top: 30px;
+            background: linear-gradient(45deg, #00ff99, #0066ff);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.3s ease;
+            text-decoration: none;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.6);
+        }
+
+        .back-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.8);
+        }
+    </style>
+</head>
+<body>
+    <h2>📈 Goals Over Time</h2>
+    <canvas id="goalChart" width="600" height="300"></canvas>
+
+    <a href=" / " class="back-btn">← Back to Match</a>
+
+    <script>
+        const updateLog = JSON.parse(sessionStorage.getItem("matchLog")) || [];
+
+        const labels = updateLog.map(entry => `${entry.atMinute}'`);
+        const team1Goals = updateLog.map(entry => entry.goals1);
+        const team2Goals = updateLog.map(entry => entry.goals2);
+
+        const ctx = document.getElementById("goalChart").getContext("2d");
+
+        const data = {
+            labels,
+            datasets: [
+                {
+                    label: "Team 1 Goals",
+                    data: team1Goals,
+                    borderColor: "#007bff", // Solid blue
+                    backgroundColor: "#007bff",
+                    fill: false,
+                    tension: 0.3,
+                    borderWidth: 4,
+                    pointRadius: 5,
+                    pointHoverRadius: 7
+                },
+                {
+                    label: "Team 2 Goals",
+                    data: team2Goals,
+                    borderColor: "#ff0033", // Solid red
+                    backgroundColor: "#ff0033",
+                    fill: false,
+                    tension: 0.3,
+                    borderWidth: 4,
+                    pointRadius: 5,
+                    pointHoverRadius: 7
+                }
+            ]
+        };
+
+        const config = {
+            type: 'line',
+            data,
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Goals Scored Over Match Time',
+                        color: 'white',
+                        font: {
+                            size: 20,
+                            weight: 'bold'
+                        }
+                    },
+                    legend: {
+                        labels: {
+                            color: 'white'
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Goals',
+                            color: 'white'
+                        },
+                        ticks: {
+                            color: 'white'
+                        },
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Match Time (minutes)',
+                            color: 'white'
+                        },
+                        ticks: {
+                            color: 'white'
+                        },
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        }
+                    }
+                }
+            }
+        };
+
+        new Chart(ctx, config);
+    </script>
+   <script src="/javascripts/chatbot.js"></script>
+<script src="/javascripts/polish.js"></script>
+</body>
+</html>

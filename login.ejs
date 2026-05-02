@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signup and Login Form</title>
+    <!-- add stylesheet here -->
+    <link rel="stylesheet" href="/stylesheets/login.css">
+    <link rel="manifest" href="/manifest.json">
+</head>
+<body>
+    <div class="main">
+        <input type="checkbox" id="chk" >
+
+        <div class="signup">
+            <form action="/register" method="post">
+
+                <label for="chk">Sign up</label>
+                
+                <input type="text" name="username" placeholder="User name" required="">
+
+                <input type="email" name="email" id="" placeholder="email" required="">
+                <input type="password" name="password" placeholder="password" id="" required="">
+                <button>Sign up</button>
+            </form>
+        </div>
+
+        <div class="login">
+            <form action="/login" method="POST">
+                <label for="chk" >Login</label>
+                <input type="text" name="username" id="" placeholder="Username" required="">
+                <input type="password" name="password" id="" placeholder="password" required="">
+                <button  type="submit">login</button>
+                <button type="reset">Reset</button>
+                <p>Don't have account <a href="/loginpage">Create account</a>.</p>
+            </form>
+        </div>
+    </div>
+    <script src="/javascripts/chatbot.js"></script>
+<script src="/javascripts/polish.js"></script>
+</body>
+</html>
